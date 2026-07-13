@@ -1,0 +1,9 @@
+forwards:
+  - name: db
+    target: svc/postgres
+    namespace: data
+    ports: "5432:5432"
+  - name: api
+    target: deploy/api
+    namespace: app
+    ports: "8080:80"

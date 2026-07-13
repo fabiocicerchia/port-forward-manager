@@ -1,0 +1,23 @@
+# Local port-forward profile (root only; examples/ profiles stay tracked)
+/pfm.yaml
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs / caches
+*.log
+.cache/
+
+# Docs site build
+site/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

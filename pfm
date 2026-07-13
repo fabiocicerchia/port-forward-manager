@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# pfm — port-forward manager: multiple kubectl port-forwards from a profile
+# file, with auto-reconnect and status.
+#
+#   pfm up [profile]      start all forwards (default profile: ./pfm.yaml or ~/.config/pfm/default.yaml)
+#   pfm status            show forwards and their health
+#   pfm logs NAME         tail one forward's log
+#   pfm down              stop everything
+#
+# Profile format (YAML list under forwards:, one block per forward):
+#   forwards:
+#     - name: db
+#       target: svc/postgres
+#       namespace: data
+#       ports: "5432:5432"
+#     - name: api
+#       target: deploy/api
+#       ports: "8080:80"
+#       context: staging
+set -euo pipefail
+
+STATE_DIR="${PFM_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/pfm-$USER}"
+RECONNECT_DELAY="${PFM_RECONNECT_DELAY:-2}"
+mkdir -p "$STATE_DIR"
+
+find_profile() {
+  local candidate="${1:-}"
+  for f in "$candidate" ./pfm.yaml "${HOME}/.config/pfm/default.yaml"; do
+    [[ -n "$f" && -f "$f" ]] && { echo "$f"; return; }
+  done
+  echo "pfm: no profile found (./pfm.yaml or ~/.config/pfm/default.yaml)" >&2
+  exit 64
+}
+
+parse_profile() {  # emits: name|namespace|target|ports|context
+  # Fields may sit on the `- name:` line or on following indented lines; a new
+  # list item ("- ") flushes the current forward. Quotes/spaces are stripped so
+  # both block YAML and the older inline style parse the same.
+  awk '
+    function flush() {
+      if (name != "" && target != "" && ports != "")
+        print name "|" ns "|" target "|" ports "|" ctx
+      name = ns = target = ports = ctx = ""
+    }
+    /^[[:space:]]*-[[:space:]]/              { flush() }
+    match($0, /name:[[:space:]]*[^ ]+/)      { name  =substr($0, RSTART+5,  RLENGTH-5);  gsub(/["[:space:]]/, "", name) }
+    match($0, /namespace:[[:space:]]*[^ ]+/) { ns    =substr($0, RSTART+10, RLENGTH-10); gsub(/["[:space:]]/, "", ns) }
+    match($0, /target:[[:space:]]*[^ ]+/)    { target=substr($0, RSTART+7,  RLENGTH-7);  gsub(/["[:space:]]/, "", target) }
+    match($0, /ports:[[:space:]]*[^ ]+/)     { ports =substr($0, RSTART+6,  RLENGTH-6);  gsub(/["[:space:]]/, "", ports) }
+    match($0, /context:[[:space:]]*[^ ]+/)   { ctx   =substr($0, RSTART+8,  RLENGTH-8);  gsub(/["[:space:]]/, "", ctx) }
+    END { flush() }
+  ' "$1"
+}
+
+supervise() {  # runs in background per forward: restart kubectl on drop
+  local name="$1" ns="$2" target="$3" ports="$4" ctx="$5"
+  local log="$STATE_DIR/$name.log"
+  local args=(port-forward "$target" "$ports")
+  [[ -n "$ns" ]] && args+=(-n "$ns")
+  [[ -n "$ctx" ]] && args+=(--context "$ctx")
+  while [[ -f "$STATE_DIR/$name.want" ]]; do
+    echo "[pfm $(date +%H:%M:%S)] connecting: kubectl ${args[*]}" >> "$log"
+    kubectl "${args[@]}" >> "$log" 2>&1 || true
+    [[ -f "$STATE_DIR/$name.want" ]] || break
+    echo "[pfm $(date +%H:%M:%S)] dropped, reconnecting in ${RECONNECT_DELAY}s" >> "$log"
+    sleep "$RECONNECT_DELAY"
+  done
+}
+
+cmd_up() {
+  local profile; profile="$(find_profile "${1:-}")"
+  echo "pfm: profile $profile"
+  local count=0
+  while IFS='|' read -r name ns target ports ctx; do
+    if [[ -f "$STATE_DIR/$name.pid" ]] && kill -0 "$(cat "$STATE_DIR/$name.pid")" 2>/dev/null; then
+      echo "  $name: already running"
+      continue
+    fi
+    touch "$STATE_DIR/$name.want"
+    echo "$ports" > "$STATE_DIR/$name.ports"
+    supervise "$name" "$ns" "$target" "$ports" "$ctx" &
+    echo $! > "$STATE_DIR/$name.pid"
+    echo "  $name: ${target}${ns:+ (ns $ns)} on $ports"
+    count=$((count+1))
+  done < <(parse_profile "$profile")
+  echo "pfm: $count forward(s) started. 'pfm status' to check, 'pfm down' to stop."
+}
+
+cmd_status() {
+  local found=0
+  for want in "$STATE_DIR"/*.want; do
+    [[ -e "$want" ]] || break
+    found=1
+    local name; name="$(basename "$want" .want)"
+    local ports; ports="$(cat "$STATE_DIR/$name.ports" 2>/dev/null || echo '?')"
+    local local_port="${ports%%:*}"
+    if nc -z 127.0.0.1 "$local_port" 2>/dev/null; then
+      echo "● $name  UP    localhost:$ports"
+    else
+      echo "○ $name  DOWN  localhost:$ports (reconnecting)"
+    fi
+  done
+  [[ $found -eq 1 ]] || echo "pfm: nothing running"
+}
+
+cmd_logs() {
+  local name="${1:?usage: pfm logs NAME}"
+  exec tail -f "$STATE_DIR/$name.log"
+}
+
+cmd_down() {
+  for want in "$STATE_DIR"/*.want; do
+    [[ -e "$want" ]] || break
+    local name; name="$(basename "$want" .want)"
+    rm -f "$want"
+    if [[ -f "$STATE_DIR/$name.pid" ]]; then
+      pkill -P "$(cat "$STATE_DIR/$name.pid")" 2>/dev/null || true
+      kill "$(cat "$STATE_DIR/$name.pid")" 2>/dev/null || true
+      rm -f "$STATE_DIR/$name.pid"
+    fi
+    echo "pfm: stopped $name"
+  done
+}
+
+case "${1:-help}" in
+  up)     shift; cmd_up "$@" ;;
+  status) cmd_status ;;
+  logs)   shift; cmd_logs "$@" ;;
+  down)   cmd_down ;;
+  *)      grep '^#' "$0" | sed 's/^# \{0,1\}//' ;;
+esac

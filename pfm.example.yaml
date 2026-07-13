@@ -1,0 +1,19 @@
+# Copy to ./pfm.yaml (per-project) or ~/.config/pfm/default.yaml (global).
+forwards:
+  - name: db
+    target: svc/postgres
+    namespace: data
+    ports: "5432:5432"
+  - name: redis
+    target: svc/redis
+    namespace: data
+    ports: "6379:6379"
+  - name: api
+    target: deploy/api
+    namespace: app
+    ports: "8080:80"
+  - name: grafana
+    target: svc/grafana
+    namespace: monitoring
+    ports: "3000:3000"
+    context: staging
