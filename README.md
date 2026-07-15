@@ -35,6 +35,12 @@ $ pfm status
 ## Install
 
 ```sh
+curl -fsSL https://raw.githubusercontent.com/fabiocicerchia/port-forward-manager/main/install.sh | bash
+```
+
+Or from a local clone:
+
+```sh
 make install          # or copy `pfm` onto your PATH
 ```
 
