@@ -19,7 +19,7 @@
 #       context: staging
 set -euo pipefail
 
-STATE_DIR="${PFM_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/pfm-$USER}"
+STATE_DIR="${PFM_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/pfm-${USER:-$(id -un)}}"
 RECONNECT_DELAY="${PFM_RECONNECT_DELAY:-2}"
 mkdir -p "$STATE_DIR"
 
