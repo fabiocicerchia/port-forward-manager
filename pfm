@@ -84,6 +84,13 @@ cmd_up() {
     count=$((count+1))
   done < <(parse_profile "$profile")
   echo "pfm: $count forward(s) started. 'pfm status' to check, 'pfm down' to stop."
+  # Running as PID 1 (e.g. the container ENTRYPOINT) means nothing else keeps
+  # the process alive; returning here would let the container runtime reap
+  # every backgrounded supervisor we just started. Block until stopped.
+  if [[ $$ -eq 1 ]]; then
+    trap 'cmd_down; exit 0' TERM INT
+    wait
+  fi
 }
 
 cmd_status() {
