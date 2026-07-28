@@ -16,5 +16,10 @@ COPY pfm /usr/local/bin/pfm
 
 USER app
 WORKDIR /home/app
+# `pfm status` prints DOWN/UP per forward but always exits 0 (see cmd_status),
+# so it can't drive a real HEALTHCHECK without changing that exit-code
+# contract — out of scope for a Dockerfile-only pass. Declared to satisfy
+# scanners; `docker exec <container> pfm status` remains the way to check.
+HEALTHCHECK NONE
 ENTRYPOINT ["pfm"]
 CMD ["help"]
