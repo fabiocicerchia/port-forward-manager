@@ -1,6 +1,4 @@
 # Documentation
 
-- [Getting Started](getting-started.md) — install and run your first forwards.
-- [Architecture](architecture.md) — how supervision and state work.
-
-Add pages here as the project grows.
+- [Architecture](architecture.md) — high-level design and components.
+- [Getting Started](getting-started.md) — setup, first run and day-to-day use.
