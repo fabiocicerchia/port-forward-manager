@@ -18,7 +18,25 @@ make test    # ./test.sh — full lifecycle against a stubbed kubectl, no cluste
 make lint    # shellcheck pfm test.sh
 make setup   # install git hooks + pre-commit
 ./pfm up     # run it
+make help    # Show this help
+make install # Install pfm onto PREFIX/bin (default /usr/local)
 ```
+
+## Tooling
+
+Shared config — the GitHub workflows, `.pre-commit-config.yaml`,
+`.editorconfig`, `.hadolint.yaml`, `SECURITY.md` — comes from
+[repo-skeleton](https://github.com/fabiocicerchia/repo-skeleton). Edit it
+there, not here; a local edit is drift and the next sync overwrites it.
+`check-drift.sh` in that repo reports what has diverged.
+
+- `make setup` installs the pre-commit hook, and that is the whole of it.
+  Don't add a `.githooks/` directory: `core.hooksPath` replaces `.git/hooks/`
+  wholesale, so setting it silently stops every pre-commit hook from running.
+- Hooks are pinned by commit SHA with the tag in a trailing comment. A tag can
+  be moved, a SHA cannot.
+- CI runs this same `.pre-commit-config.yaml` through `pre-commit/action`, so
+  what passes locally is what gates the pull request.
 
 ## Conventions
 

@@ -7,6 +7,7 @@
 [![security](https://github.com/fabiocicerchia/port-forward-manager/actions/workflows/security.yml/badge.svg)](https://github.com/fabiocicerchia/port-forward-manager/actions/workflows/security.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/fabiocicerchia/port-forward-manager/badge)](https://securityscorecards.dev/viewer/?uri=github.com/fabiocicerchia/port-forward-manager)
+[![CI carbon](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/fabiocicerchia/port-forward-manager/gh-pages/badge.json)](.github/workflows/carbon-badge.yml)
 [![Release](https://img.shields.io/github/v/release/fabiocicerchia/port-forward-manager)](https://github.com/fabiocicerchia/port-forward-manager/releases)
 
 The perpetual daily annoyance, fixed.
