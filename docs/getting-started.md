@@ -14,7 +14,7 @@ make install          # copies pfm to /usr/local/bin
 ## Configure
 
 Create `./pfm.yaml` (per-project) or `~/.config/pfm/default.yaml` (global).
-Start from [`pfm.example.yaml`](../pfm.example.yaml):
+Start from [`pfm.example.yaml`](https://github.com/fabiocicerchia/port-forward-manager/blob/main/pfm.example.yaml):
 
 ```yaml
 forwards:
