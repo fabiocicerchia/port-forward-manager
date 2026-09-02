@@ -21,6 +21,7 @@ set -euo pipefail
 
 STATE_DIR="${PFM_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/pfm-${USER:-$(id -un)}}"
 RECONNECT_DELAY="${PFM_RECONNECT_DELAY:-2}"
+readonly EX_USAGE=64  # sysexits(3): pfm was invoked wrong
 mkdir -p "$STATE_DIR"
 
 find_profile() {
@@ -29,7 +30,7 @@ find_profile() {
     [[ -n "$f" && -f "$f" ]] && { echo "$f"; return; }
   done
   echo "pfm: no profile found (./pfm.yaml or ~/.config/pfm/default.yaml)" >&2
-  exit 64
+  exit "$EX_USAGE"
 }
 
 parse_profile() {  # emits: name|namespace|target|ports|context
@@ -111,7 +112,8 @@ cmd_status() {
 }
 
 cmd_logs() {
-  local name="${1:?usage: pfm logs NAME}"
+  local name="${1:-}"
+  [[ -n "$name" ]] || { echo "pfm: usage: pfm logs NAME" >&2; exit "$EX_USAGE"; }
   exec tail -f "$STATE_DIR/$name.log"
 }
 
