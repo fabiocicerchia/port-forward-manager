@@ -29,6 +29,9 @@ sleep 1
 grep -q "svc/postgres 5432:5432" "$PFM_STATE_DIR/db.log"
 grep -q -- "-n data" "$PFM_STATE_DIR/db.log"
 ./pfm status | grep -q "db"
+code=0; ./pfm logs 2>/dev/null || code=$?
+[[ "$code" -eq 64 ]] || { echo "FAIL: 'pfm logs' with no NAME exited $code, want 64"; exit 1; }
+
 ./pfm down | grep -q "stopped db"
 sleep 1
 pgrep -f "stub kubectl" >/dev/null && { echo "FAIL: kubectl still running"; exit 1; }
