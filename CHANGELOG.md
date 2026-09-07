@@ -5,44 +5,38 @@ Conventional Commit messages. Don't edit it by hand.
 
 ## [0.2.2](https://github.com/fabiocicerchia/port-forward-manager/compare/v0.2.1...v0.2.2) (2026-09-02)
 
-
 ### Bug Fixes
 
-* **EXIT:** exit 64 when `pfm logs` is given no NAME ([#41](https://github.com/fabiocicerchia/port-forward-manager/issues/41)) ([bf32290](https://github.com/fabiocicerchia/port-forward-manager/commit/bf3229070b21af705033912df5e43e78037ef780))
+- **EXIT:** exit 64 when `pfm logs` is given no NAME ([#41](https://github.com/fabiocicerchia/port-forward-manager/issues/41)) ([bf32290](https://github.com/fabiocicerchia/port-forward-manager/commit/bf3229070b21af705033912df5e43e78037ef780))
 
 ## [0.2.1](https://github.com/fabiocicerchia/port-forward-manager/compare/v0.2.0...v0.2.1) (2026-08-29)
 
-
 ### Bug Fixes
 
-* unblock quality and clear the Scorecard pinned-dependencies finding ([#35](https://github.com/fabiocicerchia/port-forward-manager/issues/35)) ([31bc6a2](https://github.com/fabiocicerchia/port-forward-manager/commit/31bc6a2ee9ec9f3f6086d5a92b9e922fbe0ba4b5))
+- unblock quality and clear the Scorecard pinned-dependencies finding ([#35](https://github.com/fabiocicerchia/port-forward-manager/issues/35)) ([31bc6a2](https://github.com/fabiocicerchia/port-forward-manager/commit/31bc6a2ee9ec9f3f6086d5a92b9e922fbe0ba4b5))
 
 ## [0.2.0](https://github.com/fabiocicerchia/port-forward-manager/compare/v0.1.2...v0.2.0) (2026-08-25)
 
-
 ### Features
 
-* **docs:** build the docs site in Actions and drop Read the Docs ([#32](https://github.com/fabiocicerchia/port-forward-manager/issues/32)) ([16c0f86](https://github.com/fabiocicerchia/port-forward-manager/commit/16c0f86c1a89cfda5a4e9b051d96dd63f4bd636d))
-
+- **docs:** build the docs site in Actions and drop Read the Docs ([#32](https://github.com/fabiocicerchia/port-forward-manager/issues/32)) ([16c0f86](https://github.com/fabiocicerchia/port-forward-manager/commit/16c0f86c1a89cfda5a4e9b051d96dd63f4bd636d))
 
 ### Bug Fixes
 
-* **ci:** compute the next release PR after the draft is published ([#29](https://github.com/fabiocicerchia/port-forward-manager/issues/29)) ([53b105c](https://github.com/fabiocicerchia/port-forward-manager/commit/53b105c80d3fe27d1accaf8fbcc93fee785e5047))
+- **ci:** compute the next release PR after the draft is published ([#29](https://github.com/fabiocicerchia/port-forward-manager/issues/29)) ([53b105c](https://github.com/fabiocicerchia/port-forward-manager/commit/53b105c80d3fe27d1accaf8fbcc93fee785e5047))
 
 ## [0.1.2](https://github.com/fabiocicerchia/port-forward-manager/compare/v0.1.1...v0.1.2) (2026-08-13)
 
-
 ### Bug Fixes
 
-* security and code-quality findings ([#24](https://github.com/fabiocicerchia/port-forward-manager/issues/24)) ([5be71b8](https://github.com/fabiocicerchia/port-forward-manager/commit/5be71b8641e1378151b16b89f7db0f90df74de29))
+- security and code-quality findings ([#24](https://github.com/fabiocicerchia/port-forward-manager/issues/24)) ([5be71b8](https://github.com/fabiocicerchia/port-forward-manager/commit/5be71b8641e1378151b16b89f7db0f90df74de29))
 
 ## [0.1.1](https://github.com/fabiocicerchia/port-forward-manager/compare/v0.1.0...v0.1.1) (2026-08-06)
 
-
 ### Bug Fixes
 
-* **pre-commit:** stop check-yaml failing on Helm templates and multi-doc manifests ([4dcb5a8](https://github.com/fabiocicerchia/port-forward-manager/commit/4dcb5a8e52de156a0c18c87aa1da21890da1568e))
-* **security:** skip the SARIF upload on private repos ([05ce1ac](https://github.com/fabiocicerchia/port-forward-manager/commit/05ce1ac4a9a15a8bb3db4bb64df8dc83a7445008))
+- **pre-commit:** stop check-yaml failing on Helm templates and multi-doc manifests ([4dcb5a8](https://github.com/fabiocicerchia/port-forward-manager/commit/4dcb5a8e52de156a0c18c87aa1da21890da1568e))
+- **security:** skip the SARIF upload on private repos ([05ce1ac](https://github.com/fabiocicerchia/port-forward-manager/commit/05ce1ac4a9a15a8bb3db4bb64df8dc83a7445008))
 
 ## [0.1.0] - 2026-07-13
 
