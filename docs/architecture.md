@@ -21,7 +21,7 @@ exits, until asked to stop.
 
 ## Data flow
 
-```
+```text
 pfm.yaml ──parse_profile──▶ name|ns|target|ports|ctx
                                    │
                              supervise &  ──▶ kubectl port-forward (retry loop)
