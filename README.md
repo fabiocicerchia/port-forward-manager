@@ -81,6 +81,31 @@ pfm down           # stop everything
 Each forward is supervised: when kubectl drops the connection, pfm reconnects
 after `PFM_RECONNECT_DELAY` (2s default).
 
+## Development
+
+### Make targets
+
+`make help` lists them. Every repository in this estate exposes the same eight
+verbs, so you do not have to read a Makefile to find out how to build or test it
+(FC-GEN-057).
+
+| Verb      | What it does here                                        |
+| --------- | -------------------------------------------------------- |
+| `setup`   | Install the pre-commit hook                              |
+| `install` | Copy `pfm` into `PREFIX/bin` (default `/usr/local`)      |
+| `test`    | The lifecycle test, with kubectl stubbed — no cluster    |
+| `lint`    | `pre-commit run --all-files` — the whole gate            |
+| `run`     | Run `pfm` from the checkout; `ARGS` is the subcommand    |
+| `format`  | Rewrite what the gate can fix: whitespace, endings, EOF  |
+| `analyze` | `shellcheck` on its own, without the rest of the gate    |
+
+#### Not applicable
+
+One verb has no meaning here. It exits 0 and says so rather than pretending to
+work (FC-GEN-058):
+
+- `build` — `pfm` is a shell script; `make install` copies it.
+
 ## Documentation
 
 Full docs live in [`docs/`](docs/). Runnable examples live in
