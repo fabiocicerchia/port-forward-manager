@@ -16,6 +16,6 @@ labels: bug
 
 ## Environment
 
-- pfm version:
+- portfwd version:
 - OS / shell:
 - kubectl version:

@@ -3,7 +3,7 @@ name: release
 # release-please reads Conventional Commit messages on main and keeps an open
 # "release PR" with the next version bump + CHANGELOG. Merging that PR tags the
 # release (vX.Y.Z), publishes a GitHub Release, and the upload-assets job then
-# attaches the pfm script + checksum for curl installs.
+# attaches the portfwd script + checksum for curl installs.
 #
 # Why this is two release-please jobs and not one — do not collapse them back:
 # a draft release has no git tag, publishing it is what creates the tag. A
@@ -55,11 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Checksum
-        run: sha256sum pfm > pfm.sha256
-      - name: Attach pfm + checksum to the release
+        run: sha256sum portfwd > portfwd.sha256
+      - name: Attach portfwd + checksum to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" pfm pfm.sha256 --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" portfwd portfwd.sha256 --clobber --repo "$GITHUB_REPOSITORY"
 
       - name: Publish the draft release
         # Assets can only be attached while the release is a draft;

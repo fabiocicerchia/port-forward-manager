@@ -1,8 +1,8 @@
-.TH PFM 1 "2026-09" "port-forward-manager" "User Commands"
+.TH PORTFWD 1 "2026-09" "port-forward-manager" "User Commands"
 .SH NAME
-pfm \- run several kubectl port-forwards from a profile, with auto-reconnect
+portfwd \- run several kubectl port-forwards from a profile, with auto-reconnect
 .SH SYNOPSIS
-.B pfm
+.B portfwd
 .I command
 .RI [ profile | name ]
 .SH DESCRIPTION
@@ -14,9 +14,9 @@ drops \(em which is what a hand-run port-forward does not do.
 .TP
 .BR up " [\fIprofile\fR]"
 Start every forward in the profile. The default profile is
-.I ./pfm.yaml
+.I ./portfwd.yaml
 or
-.IR ~/.config/pfm/default.yaml .
+.IR ~/.config/portfwd/default.yaml .
 .TP
 .B status
 Show the forwards and their health.
@@ -28,7 +28,7 @@ Tail one forward's log.
 Stop everything.
 .SH FILES
 .TP
-.I ./pfm.yaml
+.I ./portfwd.yaml
 Default profile: a
 .B forwards:
 list, one block per forward, each with
@@ -40,7 +40,7 @@ and optionally
 and
 .BR context .
 .TP
-.I ~/.config/pfm/default.yaml
+.I ~/.config/portfwd/default.yaml
 Fallback profile when there is none in the working directory.
 .SH EXIT STATUS
 .TP
@@ -54,19 +54,19 @@ The profile was missing or invalid, or a forward could not be started.
 Bring up every forward in the local profile:
 .PP
 .RS
-.B pfm up
+.B portfwd up
 .RE
 .PP
 See what is connected:
 .PP
 .RS
-.B pfm status
+.B portfwd status
 .RE
 .PP
 Follow one of them:
 .PP
 .RS
-.B pfm logs db
+.B portfwd logs db
 .RE
 .SH SEE ALSO
 .BR kubectl (1).

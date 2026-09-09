@@ -1,4 +1,4 @@
-# port-forward-manager (`pfm`)
+# port-forward-manager (`portfwd`)
 
 > Manage multiple kubectl port-forwards from a profile file, with
 > auto-reconnect, per-forward logs, and an at-a-glance status view.
@@ -13,14 +13,14 @@
 The perpetual daily annoyance, fixed.
 
 ```console
-$ pfm up
-pfm: profile ./pfm.yaml
+$ portfwd up
+portfwd: profile ./portfwd.yaml
   db: svc/postgres (ns data) on 5432:5432
   redis: svc/redis (ns data) on 6379:6379
   api: deploy/api (ns app) on 8080:80
-pfm: 3 forward(s) started.
+portfwd: 3 forward(s) started.
 
-$ pfm status
+$ portfwd status
 ● db     UP    localhost:5432:5432
 ● redis  UP    localhost:6379:6379
 ○ api    DOWN  localhost:8080:80 (reconnecting)
@@ -41,22 +41,22 @@ curl -fsSL https://raw.githubusercontent.com/fabiocicerchia/port-forward-manager
 Or from a local clone:
 
 ```sh
-make install          # or copy `pfm` onto your PATH
+make install          # or copy `portfwd` onto your PATH
 ```
 
 Or grab the released script directly:
 
 ```sh
-curl -fsSLO https://github.com/fabiocicerchia/port-forward-manager/releases/latest/download/pfm
-install -m 0755 pfm /usr/local/bin/pfm
+curl -fsSLO https://github.com/fabiocicerchia/port-forward-manager/releases/latest/download/portfwd
+install -m 0755 portfwd /usr/local/bin/portfwd
 ```
 
 Dependencies: bash, kubectl, nc, awk — nothing else.
 
 ## Usage
 
-Per-project `./pfm.yaml` or global `~/.config/pfm/default.yaml`
-(see [`pfm.example.yaml`](pfm.example.yaml)):
+Per-project `./portfwd.yaml` or global `~/.config/portfwd/default.yaml`
+(see [`portfwd.example.yaml`](portfwd.example.yaml)):
 
 ```yaml
 forwards:
@@ -72,14 +72,14 @@ forwards:
 ```
 
 ```sh
-pfm up [profile]   # start all forwards
-pfm status         # show forwards and their health
-pfm logs NAME      # tail one forward's log
-pfm down           # stop everything
+portfwd up [profile]   # start all forwards
+portfwd status         # show forwards and their health
+portfwd logs NAME      # tail one forward's log
+portfwd down           # stop everything
 ```
 
-Each forward is supervised: when kubectl drops the connection, pfm reconnects
-after `PFM_RECONNECT_DELAY` (2s default).
+Each forward is supervised: when kubectl drops the connection, portfwd reconnects
+after `PORTFWD_RECONNECT_DELAY` (2s default).
 
 ## Verifying the image
 
@@ -110,10 +110,10 @@ verbs, so you do not have to read a Makefile to find out how to build or test it
 | Verb      | What it does here                                       |
 | --------- | ------------------------------------------------------- |
 | `setup`   | Install the pre-commit hook                             |
-| `install` | Copy `pfm` into `PREFIX/bin` (default `/usr/local`)     |
+| `install` | Copy `portfwd` into `PREFIX/bin` (default `/usr/local`)     |
 | `test`    | The lifecycle test, with kubectl stubbed — no cluster   |
 | `lint`    | `pre-commit run --all-files` — the whole gate           |
-| `run`     | Run `pfm` from the checkout; `ARGS` is the subcommand   |
+| `run`     | Run `portfwd` from the checkout; `ARGS` is the subcommand   |
 | `format`  | Rewrite what the gate can fix: whitespace, endings, EOF |
 | `analyze` | `shellcheck` on its own, without the rest of the gate   |
 
@@ -122,7 +122,7 @@ verbs, so you do not have to read a Makefile to find out how to build or test it
 One verb has no meaning here. It exits 0 and says so rather than pretending to
 work (FC-GEN-058):
 
-- `build` — `pfm` is a shell script; `make install` copies it.
+- `build` — `portfwd` is a shell script; `make install` copies it.
 
 ## Documentation
 

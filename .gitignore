@@ -1,5 +1,5 @@
 # Local port-forward profile (root only; examples/ profiles stay tracked)
-/pfm.yaml
+/portfwd.yaml
 
 # Secrets / local env
 .env

@@ -6,7 +6,7 @@ with auto-reconnect.
 ## Run
 
 ```sh
-pfm up examples/basic/pfm.yaml
-pfm status
-pfm down
+portfwd up examples/basic/portfwd.yaml
+portfwd status
+portfwd down
 ```
