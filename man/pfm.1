@@ -1,0 +1,75 @@
+.TH PFM 1 "2026-09" "port-forward-manager" "User Commands"
+.SH NAME
+pfm \- run several kubectl port-forwards from a profile, with auto-reconnect
+.SH SYNOPSIS
+.B pfm
+.I command
+.RI [ profile | name ]
+.SH DESCRIPTION
+Starts and supervises several
+.B kubectl port-forward
+processes described in one profile file, reconnecting each one when it
+drops \(em which is what a hand-run port-forward does not do.
+.SH COMMANDS
+.TP
+.BR up " [\fIprofile\fR]"
+Start every forward in the profile. The default profile is
+.I ./pfm.yaml
+or
+.IR ~/.config/pfm/default.yaml .
+.TP
+.B status
+Show the forwards and their health.
+.TP
+.BI logs " NAME"
+Tail one forward's log.
+.TP
+.B down
+Stop everything.
+.SH FILES
+.TP
+.I ./pfm.yaml
+Default profile: a
+.B forwards:
+list, one block per forward, each with
+.BR name ,
+.BR target ,
+.B ports
+and optionally
+.B namespace
+and
+.BR context .
+.TP
+.I ~/.config/pfm/default.yaml
+Fallback profile when there is none in the working directory.
+.SH EXIT STATUS
+.TP
+.B 0
+The command completed.
+.TP
+.B non-zero
+The profile was missing or invalid, or a forward could not be started.
+.SH EXAMPLES
+.PP
+Bring up every forward in the local profile:
+.PP
+.RS
+.B pfm up
+.RE
+.PP
+See what is connected:
+.PP
+.RS
+.B pfm status
+.RE
+.PP
+Follow one of them:
+.PP
+.RS
+.B pfm logs db
+.RE
+.SH SEE ALSO
+.BR kubectl (1).
+Project documentation:
+.UR https://github.com/fabiocicerchia/port-forward-manager
+.UE
