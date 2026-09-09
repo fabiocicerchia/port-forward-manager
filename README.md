@@ -81,6 +81,24 @@ pfm down           # stop everything
 Each forward is supervised: when kubectl drops the connection, pfm reconnects
 after `PFM_RECONNECT_DELAY` (2s default).
 
+## Verifying the image
+
+Every published image is signed with [cosign][cosign], keyless: the identity in
+the signature is the workflow that published it, not a key anybody holds.
+
+```sh
+cosign verify ghcr.io/fabiocicerchia/port-forward-manager:latest \
+  --certificate-identity-regexp \
+    'https://github.com/fabiocicerchia/port-forward-manager/.github/workflows/.*' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+`no signatures found` means the tag predates signing, not that verification was
+set up wrongly — a wrong identity or issuer says so explicitly. Re-run the
+publish workflow for that tag to sign it.
+
+[cosign]: https://docs.sigstore.dev/
+
 ## Development
 
 ### Make targets
