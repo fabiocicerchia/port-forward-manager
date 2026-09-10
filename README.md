@@ -107,15 +107,15 @@ publish workflow for that tag to sign it.
 verbs, so you do not have to read a Makefile to find out how to build or test it
 (FC-GEN-057).
 
-| Verb      | What it does here                                       |
-| --------- | ------------------------------------------------------- |
-| `setup`   | Install the pre-commit hook                             |
-| `install` | Copy `portfwd` into `PREFIX/bin` (default `/usr/local`)     |
-| `test`    | The lifecycle test, with kubectl stubbed — no cluster   |
-| `lint`    | `pre-commit run --all-files` — the whole gate           |
-| `run`     | Run `portfwd` from the checkout; `ARGS` is the subcommand   |
-| `format`  | Rewrite what the gate can fix: whitespace, endings, EOF |
-| `analyze` | `shellcheck` on its own, without the rest of the gate   |
+| Verb      | What it does here                                         |
+| --------- | --------------------------------------------------------- |
+| `setup`   | Install the pre-commit hook                               |
+| `install` | Copy `portfwd` into `PREFIX/bin` (default `/usr/local`)   |
+| `test`    | The lifecycle test, with kubectl stubbed — no cluster     |
+| `lint`    | `pre-commit run --all-files` — the whole gate             |
+| `run`     | Run `portfwd` from the checkout; `ARGS` is the subcommand |
+| `format`  | Rewrite what the gate can fix: whitespace, endings, EOF   |
+| `analyze` | `shellcheck` on its own, without the rest of the gate     |
 
 #### Not applicable
 
