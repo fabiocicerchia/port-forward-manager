@@ -1,4 +1,4 @@
-# Copy to ./pfm.yaml (per-project) or ~/.config/pfm/default.yaml (global).
+# Copy to ./portfwd.yaml (per-project) or ~/.config/portfwd/default.yaml (global).
 forwards:
   - name: db
     target: svc/postgres

@@ -4,7 +4,7 @@ Thanks for taking the time to contribute to port-forward-manager!
 
 ## Getting started
 
-`pfm` is a single Bash script. You need `bash`, `make`, `shellcheck`, and
+`portfwd` is a single Bash script. You need `bash`, `make`, `shellcheck`, and
 `kubectl` (only for real use — tests stub it).
 
 1. Fork and clone the repo.
@@ -12,7 +12,7 @@ Thanks for taking the time to contribute to port-forward-manager!
 1. Create a branch: `git checkout -b feat/short-description`.
 
 ```sh
-make lint    # shellcheck pfm test.sh
+make lint    # shellcheck portfwd test.sh
 make test    # ./test.sh (kubectl is stubbed; no cluster needed)
 ```
 
@@ -39,7 +39,7 @@ don't tag or edit the changelog manually.
 1. release-please keeps an open **release PR** ("chore: release X.Y.Z"),
    recalculating the next version and changelog on every merge.
 1. When you're ready to ship, **merge the release PR** — that (and only that)
-   creates the `vX.Y.Z` tag, the GitHub Release, and attaches the `pfm` script
+   creates the `vX.Y.Z` tag, the GitHub Release, and attaches the `portfwd` script
    plus its checksum for `curl` installs.
 
 ## Pull requests

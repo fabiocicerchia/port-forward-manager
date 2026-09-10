@@ -8,13 +8,13 @@
 ## Install
 
 ```sh
-make install          # copies pfm to /usr/local/bin
+make install          # copies portfwd to /usr/local/bin
 ```
 
 ## Configure
 
-Create `./pfm.yaml` (per-project) or `~/.config/pfm/default.yaml` (global).
-Start from [`pfm.example.yaml`](https://github.com/fabiocicerchia/port-forward-manager/blob/main/pfm.example.yaml):
+Create `./portfwd.yaml` (per-project) or `~/.config/portfwd/default.yaml` (global).
+Start from [`portfwd.example.yaml`](https://github.com/fabiocicerchia/port-forward-manager/blob/main/portfwd.example.yaml):
 
 ```yaml
 forwards:
@@ -27,10 +27,10 @@ forwards:
 ## Run
 
 ```sh
-pfm up          # start every forward in the profile
-pfm status      # UP/DOWN per forward
-pfm logs db     # tail one forward
-pfm down        # stop everything
+portfwd up          # start every forward in the profile
+portfwd status      # UP/DOWN per forward
+portfwd logs db     # tail one forward
+portfwd down        # stop everything
 ```
 
-Tune with `PFM_STATE_DIR` and `PFM_RECONNECT_DELAY` (see `.env.example`).
+Tune with `PORTFWD_STATE_DIR` and `PORTFWD_RECONNECT_DELAY` (see `.env.example`).

@@ -18,12 +18,12 @@ setup: ## Install the pre-commit hook
 
 install: ## Install the tools and their man pages (DESTDIR/PREFIX honoured)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(PREFIX)/share/man/man1"
-	install -m 0755 pfm "$(DESTDIR)$(PREFIX)/bin/pfm"
-	install -m 0644 man/pfm.1 "$(DESTDIR)$(PREFIX)/share/man/man1/pfm.1"
-	@echo "installed pfm into $(DESTDIR)$(PREFIX)/bin"
+	install -m 0755 portfwd "$(DESTDIR)$(PREFIX)/bin/portfwd"
+	install -m 0644 man/portfwd.1 "$(DESTDIR)$(PREFIX)/share/man/man1/portfwd.1"
+	@echo "installed portfwd into $(DESTDIR)$(PREFIX)/bin"
 
 uninstall: ## Remove what `make install` put down
-	rm -f "$(DESTDIR)$(PREFIX)/bin/pfm" "$(DESTDIR)$(PREFIX)/share/man/man1/pfm.1"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/portfwd" "$(DESTDIR)$(PREFIX)/share/man/man1/portfwd.1"
 
 lint: ## Run the whole gate — every hook, every file
 	pre-commit run --all-files
@@ -31,8 +31,8 @@ lint: ## Run the whole gate — every hook, every file
 test: ## Run the lifecycle test (kubectl stubbed, no cluster needed)
 	./test.sh
 
-run: ## Run pfm from the checkout (ARGS is the subcommand, default `help`)
-	./pfm $(ARGS)
+run: ## Run portfwd from the checkout (ARGS is the subcommand, default `help`)
+	./portfwd $(ARGS)
 
 format: ## Rewrite what the gate can fix: whitespace, line endings, final newline
 	@# A fixing hook exits 1 when it rewrites a file. That is this target doing
@@ -46,10 +46,10 @@ analyze: ## Shellcheck the scripts on their own, without the rest of the gate
 	@command -v shellcheck >/dev/null 2>&1 || { \
 		echo "analyze needs shellcheck: https://github.com/koalaman/shellcheck#installing" >&2; \
 		exit 69; }
-	shellcheck pfm test.sh
+	shellcheck portfwd test.sh
 
 # --- Declared no-op (FC-GEN-058) ---
 
 build: ## Not applicable — nothing is compiled
-	@echo 'Nothing to build: pfm is a shell script; make install copies it.'
+	@echo 'Nothing to build: portfwd is a shell script; make install copies it.'
 	@echo "See README > Not applicable."

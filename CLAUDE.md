@@ -4,22 +4,22 @@ Guidance for Claude Code (and other AI agents) working in this repo.
 
 ## Project
 
-`pfm` is a single-file Bash CLI that runs and supervises multiple
+`portfwd` is a single-file Bash CLI that runs and supervises multiple
 `kubectl port-forward` processes from a YAML profile, reconnecting them when
-they drop. Entry point: the `pfm` script (dispatch is the `case` at the
+they drop. Entry point: the `portfwd` script (dispatch is the `case` at the
 bottom). Config is parsed by `parse_profile` with awk — no YAML library.
 Runtime deps: bash, kubectl, awk, nc, pkill.
 
 ## Commands
 
 ```sh
-# build: none — pfm is a script
+# build: none — portfwd is a script
 make test    # ./test.sh — full lifecycle against a stubbed kubectl, no cluster
-make lint    # shellcheck pfm test.sh
+make lint    # shellcheck portfwd test.sh
 make setup   # install git hooks + pre-commit
-./pfm up     # run it
+./portfwd up     # run it
 make help    # Show this help
-make install # Install pfm onto PREFIX/bin (default /usr/local)
+make install # Install portfwd onto PREFIX/bin (default /usr/local)
 ```
 
 ## Tooling
