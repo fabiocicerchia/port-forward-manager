@@ -1,0 +1,21 @@
+# Everything on the `prod` context is protected; `payments` is protected on its
+# own, whatever context it runs on.
+contexts:
+  - name: prod
+    protected: true
+
+forwards:
+  - name: dev-db
+    target: svc/postgres
+    namespace: data
+    ports: "5432:5432"
+  - name: prod-db
+    target: svc/postgres
+    namespace: data
+    ports: "15432:5432"
+    context: prod
+  - name: payments
+    target: svc/payments
+    namespace: app
+    ports: "9000:80"
+    protected: true

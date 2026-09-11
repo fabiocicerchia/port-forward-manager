@@ -53,6 +53,8 @@ project already expects.
 - Per-forward logs and a live status view.
 - `portfwd env` prints the same profile as environment variables, so a
   project's `.env` comes from the file that opens the forwards.
+- `protected: true` guards prod: opening it needs `--reason`, and every
+  protected session lands in a local log.
 
 ## Install
 
@@ -130,6 +132,56 @@ $ portfwd env --format json
 ```
 
 `--format` takes `dotenv` (the default), `export`, or `json`.
+
+### Protected forwards
+
+`kubectl port-forward` leaves no trail: nothing records that someone opened a
+tunnel into the production database at 02:00, or why. Mark a forward — or a
+whole context — `protected: true` and portfwd asks for a reason and keeps the
+record itself.
+
+```yaml
+contexts:
+  - name: prod
+    protected: true       # everything on this context is protected
+forwards:
+  - name: prod-db
+    target: svc/postgres
+    namespace: data
+    ports: "15432:5432"
+    context: prod
+  - name: payments
+    target: svc/payments
+    ports: "9000:80"
+    protected: true       # or protect a single forward
+```
+
+```console
+$ portfwd up
+portfwd: protected in this profile: prod-db payments
+portfwd: opening a protected forward needs --reason "<why>" (logged to /home/you/.local/state/portfwd/protected.log)
+
+$ portfwd up --reason "INC-4711: replaying the stuck payment batch"
+portfwd: profile ./portfwd.yaml
+  prod-db: svc/postgres (ns data) on 15432:5432 [protected]
+  payments: svc/payments on 9000:80 [protected]
+portfwd: 2 forward(s) started. 'portfwd status' to check, 'portfwd down' to stop.
+```
+
+The run is refused whole, not in part — a profile that names prod is opened
+deliberately or not at all. When the session ends, one tab-separated line is
+appended to `$PORTFWD_AUDIT_LOG` (default
+`~/.local/state/portfwd/protected.log`, mode 600):
+
+```console
+$ column -t -s $'\t' ~/.local/state/portfwd/protected.log
+prod  data  svc/postgres  you  2026-09-11T08:14:02Z  2026-09-11T09:31:40Z  INC-4711: replaying the stuck payment batch
+```
+
+Context, namespace, target, user, start, end, reason. A session cut short with
+the machine is closed out with `interrupted` as its end on the next `portfwd
+up`. There is no server and nothing to sign in to: the log is a file on your
+disk, for you to keep, rotate, or ship wherever your team already ships logs.
 
 ## Verifying the image
 

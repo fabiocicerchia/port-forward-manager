@@ -2,7 +2,7 @@
 # portfwd — port-forward manager: multiple kubectl port-forwards from a profile
 # file, with auto-reconnect and status.
 #
-#   portfwd up [profile]                   start all forwards (default profile: ./portfwd.yaml or ~/.config/portfwd/default.yaml)
+#   portfwd up [profile] [--reason TEXT]   start all forwards (default profile: ./portfwd.yaml or ~/.config/portfwd/default.yaml)
 #   portfwd env [profile] [--format FMT]   print the profile as environment variables (dotenv|export|json)
 #   portfwd status                         show forwards and their health
 #   portfwd logs NAME                      tail one forward's log
@@ -18,11 +18,30 @@
 #       target: deploy/api
 #       ports: "8080:80"
 #       context: staging
+#
+# Protected forwards need a reason, and every session (context, namespace,
+# target, user, start, end, reason) is appended to $PORTFWD_AUDIT_LOG — by
+# default ~/.local/state/portfwd/protected.log, a plain local file with no
+# server to reach and nothing to run as root:
+#   contexts:                 # optional: protect a whole context at once
+#     - name: prod
+#       protected: true
+#   forwards:
+#     - name: prod-db
+#       target: svc/postgres
+#       ports: "5432:5432"
+#       context: prod         # protected via the context above
+#     - name: payments
+#       target: svc/payments
+#       ports: "9000:80"
+#       protected: true       # or protect one forward on its own
 set -euo pipefail
 
 STATE_DIR="${PORTFWD_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/portfwd-${USER:-$(id -un)}}"
 RECONNECT_DELAY="${PORTFWD_RECONNECT_DELAY:-2}"
-readonly EX_USAGE=64  # sysexits(3): portfwd was invoked wrong
+AUDIT_LOG="${PORTFWD_AUDIT_LOG:-${XDG_STATE_HOME:-${HOME}/.local/state}/portfwd/protected.log}"
+readonly EX_USAGE=64   # sysexits(3): portfwd was invoked wrong
+readonly EX_NOPERM=77  # sysexits(3): a protected forward was opened without a reason
 mkdir -p "$STATE_DIR"
 
 find_profile() {
@@ -34,30 +53,76 @@ find_profile() {
   exit "$EX_USAGE"
 }
 
-parse_profile() {  # emits: name|namespace|target|ports|context
+parse_profile() {  # emits: name|namespace|target|ports|context|protected
   # Fields may sit on the `- name:` line or on following indented lines; a new
   # list item ("- ") flushes the current forward. Quotes/spaces are stripped so
   # both block YAML and the older inline style parse the same.
+  #
+  # An unindented `key:` opens a section, so `contexts:` entries are collected
+  # as a context -> protected map rather than mistaken for forwards. Rows are
+  # buffered and printed at END because `contexts:` may come after `forwards:`.
   awk '
     function flush() {
-      if (name != "" && target != "" && ports != "")
-        print name "|" ns "|" target "|" ports "|" ctx
-      name = ns = target = ports = ctx = ""
+      if (section == "forwards" && name != "" && target != "" && ports != "") {
+        rows++
+        r_name[rows] = name; r_ns[rows]  = ns;  r_target[rows] = target
+        r_ports[rows] = ports; r_ctx[rows] = ctx; r_prot[rows] = prot
+      } else if (section == "contexts" && name != "") {
+        ctx_prot[name] = prot
+      }
+      name = ns = target = ports = ctx = prot = ""
     }
-    /^[[:space:]]*-[[:space:]]/              { flush() }
-    match($0, /name:[[:space:]]*[^ ]+/)      { name  =substr($0, RSTART+5,  RLENGTH-5);  gsub(/["[:space:]]/, "", name) }
-    match($0, /namespace:[[:space:]]*[^ ]+/) { ns    =substr($0, RSTART+10, RLENGTH-10); gsub(/["[:space:]]/, "", ns) }
-    match($0, /target:[[:space:]]*[^ ]+/)    { target=substr($0, RSTART+7,  RLENGTH-7);  gsub(/["[:space:]]/, "", target) }
-    match($0, /ports:[[:space:]]*[^ ]+/)     { ports =substr($0, RSTART+6,  RLENGTH-6);  gsub(/["[:space:]]/, "", ports) }
-    match($0, /context:[[:space:]]*[^ ]+/)   { ctx   =substr($0, RSTART+8,  RLENGTH-8);  gsub(/["[:space:]]/, "", ctx) }
-    END { flush() }
+    /^[^[:space:]#-]/ {
+      flush()
+      section = ""
+      if ($0 ~ /^forwards:/) section = "forwards"
+      if ($0 ~ /^contexts:/) section = "contexts"
+    }
+    /^[[:space:]]*-[[:space:]]/                { flush() }
+    match($0, /name:[[:space:]]*[^ ]+/)        { name  =substr($0, RSTART+5,  RLENGTH-5);  gsub(/["[:space:]]/, "", name) }
+    match($0, /namespace:[[:space:]]*[^ ]+/)   { ns    =substr($0, RSTART+10, RLENGTH-10); gsub(/["[:space:]]/, "", ns) }
+    match($0, /target:[[:space:]]*[^ ]+/)      { target=substr($0, RSTART+7,  RLENGTH-7);  gsub(/["[:space:]]/, "", target) }
+    match($0, /ports:[[:space:]]*[^ ]+/)       { ports =substr($0, RSTART+6,  RLENGTH-6);  gsub(/["[:space:]]/, "", ports) }
+    match($0, /context:[[:space:]]*[^ ]+/)     { ctx   =substr($0, RSTART+8,  RLENGTH-8);  gsub(/["[:space:]]/, "", ctx) }
+    match($0, /protected:[[:space:]]*[^ ]+/)   { prot  =substr($0, RSTART+10, RLENGTH-10); gsub(/["[:space:]]/, "", prot) }
+    END {
+      flush()
+      for (i = 1; i <= rows; i++) {
+        p = (r_prot[i] == "true" || ctx_prot[r_ctx[i]] == "true") ? "true" : ""
+        print r_name[i] "|" r_ns[i] "|" r_target[i] "|" r_ports[i] "|" r_ctx[i] "|" p
+      }
+    }
   ' "$1"
 }
+
+now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 env_key() {  # a forward name as an environment variable prefix: api-gw -> API_GW
   local key="${1//[^a-zA-Z0-9]/_}"
   [[ "$key" == [0-9]* ]] && key="_$key"
   printf '%s' "$key" | tr '[:lower:]' '[:upper:]'
+}
+
+audit_open() {  # name context namespace target reason — pending session in the state dir
+  # Tab and newline would break the log's columns; "|" delimits the marker and
+  # the reason is last, so it may still contain one.
+  local reason="${5:-}"
+  reason="${reason//[$'\t\n']/ }"
+  printf '%s|%s|%s|%s|%s\n' "$2" "$3" "$4" "$(now)" "$reason" \
+    > "$STATE_DIR/$1.session"
+}
+
+audit_close() {  # name [end] — append the finished session, once
+  local marker="$STATE_DIR/$1.session"
+  [[ -f "$marker" ]] || return 0
+  local ctx ns target start reason
+  IFS='|' read -r ctx ns target start reason < "$marker"
+  rm -f "$marker"
+  mkdir -p "$(dirname "$AUDIT_LOG")"
+  [[ -e "$AUDIT_LOG" ]] || { : > "$AUDIT_LOG"; chmod 600 "$AUDIT_LOG"; }
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "${ctx:--}" "${ns:--}" "$target" "${USER:-$(id -un)}" \
+    "$start" "${2:-$(now)}" "$reason" >> "$AUDIT_LOG"
 }
 
 supervise() {  # runs in background per forward: restart kubectl on drop
@@ -76,21 +141,53 @@ supervise() {  # runs in background per forward: restart kubectl on drop
 }
 
 cmd_up() {
-  local profile; profile="$(find_profile "${1:-}")"
+  local profile_arg="" reason=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --reason)
+        [[ $# -ge 2 ]] || { echo "portfwd: --reason needs a value" >&2; exit "$EX_USAGE"; }
+        reason="$2"; shift 2 ;;
+      --reason=*) reason="${1#--reason=}"; shift ;;
+      -*) echo "portfwd: unknown option $1" >&2; exit "$EX_USAGE" ;;
+      *)  profile_arg="$1"; shift ;;
+    esac
+  done
+
+  local profile; profile="$(find_profile "$profile_arg")"
+  local rows=() row
+  while IFS= read -r row; do rows+=("$row"); done < <(parse_profile "$profile")
+
+  # Refuse the whole run rather than half of it: a profile that names prod is
+  # opened deliberately or not at all.
+  local guarded="" name ns target ports ctx protected
+  for row in ${rows[@]+"${rows[@]}"}; do
+    IFS='|' read -r name ns target ports ctx protected <<< "$row"
+    if [[ "$protected" == "true" ]]; then guarded+=" $name"; fi
+  done
+  if [[ -n "$guarded" && -z "$reason" ]]; then
+    echo "portfwd: protected in this profile:${guarded}" >&2
+    echo "portfwd: opening a protected forward needs --reason \"<why>\" (logged to $AUDIT_LOG)" >&2
+    exit "$EX_NOPERM"
+  fi
+
   echo "portfwd: profile $profile"
   local count=0
-  while IFS='|' read -r name ns target ports ctx; do
+  for row in ${rows[@]+"${rows[@]}"}; do
+    IFS='|' read -r name ns target ports ctx protected <<< "$row"
     if [[ -f "$STATE_DIR/$name.pid" ]] && kill -0 "$(cat "$STATE_DIR/$name.pid")" 2>/dev/null; then
       echo "  $name: already running"
       continue
     fi
+    # A session marker left by a supervisor that died with the machine.
+    audit_close "$name" "interrupted"
     touch "$STATE_DIR/$name.want"
     echo "$ports" > "$STATE_DIR/$name.ports"
+    [[ "$protected" == "true" ]] && audit_open "$name" "$ctx" "$ns" "$target" "$reason"
     supervise "$name" "$ns" "$target" "$ports" "$ctx" &
     echo $! > "$STATE_DIR/$name.pid"
-    echo "  $name: ${target}${ns:+ (ns $ns)} on $ports"
+    echo "  $name: ${target}${ns:+ (ns $ns)} on $ports${protected:+ [protected]}"
     count=$((count+1))
-  done < <(parse_profile "$profile")
+  done
   echo "portfwd: $count forward(s) started. 'portfwd status' to check, 'portfwd down' to stop."
   # Running as PID 1 (e.g. the container ENTRYPOINT) means nothing else keeps
   # the process alive; returning here would let the container runtime reap
@@ -123,7 +220,7 @@ cmd_env() {
   # describes how to reach them: one key per forward, HOST and PORT.
   local name ports key port first=1
   [[ "$format" == json ]] && echo "{"
-  while IFS='|' read -r name _ _ ports _; do
+  while IFS='|' read -r name _ _ ports _ _; do
     key="$(env_key "$name")"
     port="${ports%%:*}"
     case "$format" in
@@ -148,11 +245,12 @@ cmd_status() {
     found=1
     local name; name="$(basename "$want" .want)"
     local ports; ports="$(cat "$STATE_DIR/$name.ports" 2>/dev/null || echo '?')"
+    local mark=""; [[ -f "$STATE_DIR/$name.session" ]] && mark="  [protected]"
     local local_port="${ports%%:*}"
     if nc -z 127.0.0.1 "$local_port" 2>/dev/null; then
-      echo "● $name  UP    localhost:$ports"
+      echo "● $name  UP    localhost:$ports$mark"
     else
-      echo "○ $name  DOWN  localhost:$ports (reconnecting)"
+      echo "○ $name  DOWN  localhost:$ports (reconnecting)$mark"
     fi
   done
   [[ $found -eq 1 ]] || echo "portfwd: nothing running"
@@ -174,6 +272,7 @@ cmd_down() {
       kill "$(cat "$STATE_DIR/$name.pid")" 2>/dev/null || true
       rm -f "$STATE_DIR/$name.pid"
     fi
+    audit_close "$name"
     echo "portfwd: stopped $name"
   done
 }
