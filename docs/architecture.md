@@ -23,7 +23,8 @@ exits, until asked to stop.
 
 ```text
 portfwd.yaml ──parse_profile──▶ name|ns|target|ports|ctx
-                                   │
+                                   │            │
+                                   │            └─▶ portfwd env ──▶ NAME_HOST / NAME_PORT
                              supervise &  ──▶ kubectl port-forward (retry loop)
                                    │
                           state dir: .pid/.want/.ports/.log

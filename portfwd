@@ -2,10 +2,11 @@
 # portfwd — port-forward manager: multiple kubectl port-forwards from a profile
 # file, with auto-reconnect and status.
 #
-#   portfwd up [profile]      start all forwards (default profile: ./portfwd.yaml or ~/.config/portfwd/default.yaml)
-#   portfwd status            show forwards and their health
-#   portfwd logs NAME         tail one forward's log
-#   portfwd down              stop everything
+#   portfwd up [profile]                   start all forwards (default profile: ./portfwd.yaml or ~/.config/portfwd/default.yaml)
+#   portfwd env [profile] [--format FMT]   print the profile as environment variables (dotenv|export|json)
+#   portfwd status                         show forwards and their health
+#   portfwd logs NAME                      tail one forward's log
+#   portfwd down                           stop everything
 #
 # Profile format (YAML list under forwards:, one block per forward):
 #   forwards:
@@ -53,6 +54,12 @@ parse_profile() {  # emits: name|namespace|target|ports|context
   ' "$1"
 }
 
+env_key() {  # a forward name as an environment variable prefix: api-gw -> API_GW
+  local key="${1//[^a-zA-Z0-9]/_}"
+  [[ "$key" == [0-9]* ]] && key="_$key"
+  printf '%s' "$key" | tr '[:lower:]' '[:upper:]'
+}
+
 supervise() {  # runs in background per forward: restart kubectl on drop
   local name="$1" ns="$2" target="$3" ports="$4" ctx="$5"
   local log="$STATE_DIR/$name.log"
@@ -91,6 +98,46 @@ cmd_up() {
   if [[ $$ -eq 1 ]]; then
     trap 'cmd_down; exit 0' TERM INT
     wait
+  fi
+}
+
+cmd_env() {
+  local profile_arg="" format="dotenv"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --format)
+        [[ $# -ge 2 ]] || { echo "portfwd: --format needs a value" >&2; exit "$EX_USAGE"; }
+        format="$2"; shift 2 ;;
+      --format=*) format="${1#--format=}"; shift ;;
+      -*) echo "portfwd: unknown option $1" >&2; exit "$EX_USAGE" ;;
+      *)  profile_arg="$1"; shift ;;
+    esac
+  done
+  case "$format" in
+    dotenv|export|json) ;;
+    *) echo "portfwd: unknown format '$format' (dotenv|export|json)" >&2; exit "$EX_USAGE" ;;
+  esac
+
+  local profile; profile="$(find_profile "$profile_arg")"
+  # Forwards all land on localhost, so the profile that opens them also
+  # describes how to reach them: one key per forward, HOST and PORT.
+  local name ports key port first=1
+  [[ "$format" == json ]] && echo "{"
+  while IFS='|' read -r name _ _ ports _; do
+    key="$(env_key "$name")"
+    port="${ports%%:*}"
+    case "$format" in
+      dotenv) printf '%s_HOST=localhost\n%s_PORT=%s\n' "$key" "$key" "$port" ;;
+      export) printf 'export %s_HOST=localhost\nexport %s_PORT=%s\n' "$key" "$key" "$port" ;;
+      json)
+        [[ $first -eq 1 ]] || printf ',\n'
+        first=0
+        printf '  "%s_HOST": "localhost",\n  "%s_PORT": "%s"' "$key" "$key" "$port" ;;
+    esac
+  done < <(parse_profile "$profile")
+  if [[ "$format" == json ]]; then
+    [[ $first -eq 1 ]] || printf '\n'
+    echo "}"
   fi
 }
 
@@ -133,6 +180,7 @@ cmd_down() {
 
 case "${1:-help}" in
   up)     shift; cmd_up "$@" ;;
+  env)    shift; cmd_env "$@" ;;
   status) cmd_status ;;
   logs)   shift; cmd_logs "$@" ;;
   down)   cmd_down ;;

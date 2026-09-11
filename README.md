@@ -51,6 +51,8 @@ project already expects.
 - One profile file drives many `kubectl port-forward` processes.
 - Auto-reconnect when a forward drops (rollout, node drain, laptop sleep).
 - Per-forward logs and a live status view.
+- `portfwd env` prints the same profile as environment variables, so a
+  project's `.env` comes from the file that opens the forwards.
 
 ## Install
 
@@ -93,6 +95,7 @@ forwards:
 
 ```sh
 portfwd up [profile]   # start all forwards
+portfwd env [profile]  # print the profile as environment variables
 portfwd status         # show forwards and their health
 portfwd logs NAME      # tail one forward's log
 portfwd down           # stop everything
@@ -100,6 +103,33 @@ portfwd down           # stop everything
 
 Each forward is supervised: when kubectl drops the connection, portfwd reconnects
 after `PORTFWD_RECONNECT_DELAY` (2s default).
+
+### The profile as environment variables
+
+The profile already says where every service will be; `portfwd env` prints that
+as the variables an app reads, so a `.env` is generated from the same committed
+file rather than kept in sync with it by hand. The key comes from `name`,
+uppercased with anything that is not a letter or digit turned into `_`:
+
+```console
+$ portfwd env
+DB_HOST=localhost
+DB_PORT=5432
+API_HOST=localhost
+API_PORT=8080
+
+$ portfwd env --format export > .envrc
+$ eval "$(portfwd env --format export)"
+$ portfwd env --format json
+{
+  "DB_HOST": "localhost",
+  "DB_PORT": "5432",
+  "API_HOST": "localhost",
+  "API_PORT": "8080"
+}
+```
+
+`--format` takes `dotenv` (the default), `export`, or `json`.
 
 ## Verifying the image
 

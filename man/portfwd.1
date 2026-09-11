@@ -5,6 +5,7 @@ portfwd \- run several kubectl port-forwards from a profile, with auto-reconnect
 .B portfwd
 .I command
 .RI [ profile | name ]
+.RI [ options ]
 .SH DESCRIPTION
 Starts and supervises several
 .B kubectl port-forward
@@ -17,6 +18,22 @@ Start every forward in the profile. The default profile is
 .I ./portfwd.yaml
 or
 .IR ~/.config/portfwd/default.yaml .
+.TP
+.BR env " [\fIprofile\fR] [\fB\-\-format\fR \fIdotenv\fR|\fIexport\fR|\fIjson\fR]"
+Print the profile as environment variables, two per forward:
+.IB NAME _HOST
+(always
+.BR localhost )
+and
+.IB NAME _PORT
+(the local half of
+.BR ports ).
+.I NAME
+is the forward's
+.B name
+uppercased, with every character that is not a letter or a digit replaced by
+an underscore. The default format is
+.IR dotenv .
 .TP
 .B status
 Show the forwards and their health.
@@ -47,6 +64,11 @@ Fallback profile when there is none in the working directory.
 .B 0
 The command completed.
 .TP
+.B 64
+.BR portfwd (1)
+was invoked wrong: no profile, an unknown option, or an unknown
+.BR \-\-format .
+.TP
 .B non-zero
 The profile was missing or invalid, or a forward could not be started.
 .SH EXAMPLES
@@ -67,6 +89,14 @@ Follow one of them:
 .PP
 .RS
 .B portfwd logs db
+.RE
+.PP
+Write the project's
+.I .env
+from the same profile:
+.PP
+.RS
+.B portfwd env > .env
 .RE
 .SH SEE ALSO
 .BR kubectl (1).
