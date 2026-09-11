@@ -26,6 +26,26 @@ $ portfwd status
 ○ api    DOWN  localhost:8080:80 (reconnecting)
 ```
 
+## What it is
+
+A **committed profile per project**. `portfwd.yaml` sits in the repo next to the
+code that needs the forwards, so everyone on the team — and CI — brings up the
+same local ports with one command, and a change to the ports arrives as a diff.
+One profile can span **several kube contexts** at once, and the whole thing is
+**rootless**: no `/etc/hosts` edits, no privileged ports, no daemon, no
+`sudo`.
+
+### When to use something else
+
+If what you want is *forward everything in a namespace under real service
+names* — `postgres.data.svc.cluster.local` resolving on your laptop —
+[kubefwd][kubefwd] is the tool for that job, and it is good at it. It rewrites
+`/etc/hosts` and needs root to do so. `portfwd` deliberately does neither: it
+forwards the handful of things one project names, onto the localhost ports that
+project already expects.
+
+[kubefwd]: https://github.com/txn2/kubefwd
+
 ## Features
 
 - One profile file drives many `kubectl port-forward` processes.
