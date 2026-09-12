@@ -26,11 +26,35 @@ $ portfwd status
 ○ api    DOWN  localhost:8080:80 (reconnecting)
 ```
 
+## What it is
+
+A **committed profile per project**. `portfwd.yaml` sits in the repo next to the
+code that needs the forwards, so everyone on the team — and CI — brings up the
+same local ports with one command, and a change to the ports arrives as a diff.
+One profile can span **several kube contexts** at once, and the whole thing is
+**rootless**: no `/etc/hosts` edits, no privileged ports, no daemon, no
+`sudo`.
+
+### When to use something else
+
+If what you want is *forward everything in a namespace under real service
+names* — `postgres.data.svc.cluster.local` resolving on your laptop —
+[kubefwd][kubefwd] is the tool for that job, and it is good at it. It rewrites
+`/etc/hosts` and needs root to do so. `portfwd` deliberately does neither: it
+forwards the handful of things one project names, onto the localhost ports that
+project already expects.
+
+[kubefwd]: https://github.com/txn2/kubefwd
+
 ## Features
 
 - One profile file drives many `kubectl port-forward` processes.
 - Auto-reconnect when a forward drops (rollout, node drain, laptop sleep).
 - Per-forward logs and a live status view.
+- `portfwd env` prints the same profile as environment variables, so a
+  project's `.env` comes from the file that opens the forwards.
+- `protected: true` guards prod: opening it needs `--reason`, and every
+  protected session lands in a local log.
 
 ## Install
 
@@ -73,6 +97,7 @@ forwards:
 
 ```sh
 portfwd up [profile]   # start all forwards
+portfwd env [profile]  # print the profile as environment variables
 portfwd status         # show forwards and their health
 portfwd logs NAME      # tail one forward's log
 portfwd down           # stop everything
@@ -80,6 +105,83 @@ portfwd down           # stop everything
 
 Each forward is supervised: when kubectl drops the connection, portfwd reconnects
 after `PORTFWD_RECONNECT_DELAY` (2s default).
+
+### The profile as environment variables
+
+The profile already says where every service will be; `portfwd env` prints that
+as the variables an app reads, so a `.env` is generated from the same committed
+file rather than kept in sync with it by hand. The key comes from `name`,
+uppercased with anything that is not a letter or digit turned into `_`:
+
+```console
+$ portfwd env
+DB_HOST=localhost
+DB_PORT=5432
+API_HOST=localhost
+API_PORT=8080
+
+$ portfwd env --format export > .envrc
+$ eval "$(portfwd env --format export)"
+$ portfwd env --format json
+{
+  "DB_HOST": "localhost",
+  "DB_PORT": "5432",
+  "API_HOST": "localhost",
+  "API_PORT": "8080"
+}
+```
+
+`--format` takes `dotenv` (the default), `export`, or `json`.
+
+### Protected forwards
+
+`kubectl port-forward` leaves no trail: nothing records that someone opened a
+tunnel into the production database at 02:00, or why. Mark a forward — or a
+whole context — `protected: true` and portfwd asks for a reason and keeps the
+record itself.
+
+```yaml
+contexts:
+  - name: prod
+    protected: true       # everything on this context is protected
+forwards:
+  - name: prod-db
+    target: svc/postgres
+    namespace: data
+    ports: "15432:5432"
+    context: prod
+  - name: payments
+    target: svc/payments
+    ports: "9000:80"
+    protected: true       # or protect a single forward
+```
+
+```console
+$ portfwd up
+portfwd: protected in this profile: prod-db payments
+portfwd: opening a protected forward needs --reason "<why>" (logged to /home/you/.local/state/portfwd/protected.log)
+
+$ portfwd up --reason "INC-4711: replaying the stuck payment batch"
+portfwd: profile ./portfwd.yaml
+  prod-db: svc/postgres (ns data) on 15432:5432 [protected]
+  payments: svc/payments on 9000:80 [protected]
+portfwd: 2 forward(s) started. 'portfwd status' to check, 'portfwd down' to stop.
+```
+
+The run is refused whole, not in part — a profile that names prod is opened
+deliberately or not at all. When the session ends, one tab-separated line is
+appended to `$PORTFWD_AUDIT_LOG` (default
+`~/.local/state/portfwd/protected.log`, mode 600):
+
+```console
+$ column -t -s $'\t' ~/.local/state/portfwd/protected.log
+prod  data  svc/postgres  you  2026-09-11T08:14:02Z  2026-09-11T09:31:40Z  INC-4711: replaying the stuck payment batch
+```
+
+Context, namespace, target, user, start, end, reason. A session cut short with
+the machine is closed out with `interrupted` as its end on the next `portfwd
+up`. There is no server and nothing to sign in to: the log is a file on your
+disk, for you to keep, rotate, or ship wherever your team already ships logs.
 
 ## Verifying the image
 

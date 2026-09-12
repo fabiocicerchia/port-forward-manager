@@ -5,6 +5,7 @@ portfwd \- run several kubectl port-forwards from a profile, with auto-reconnect
 .B portfwd
 .I command
 .RI [ profile | name ]
+.RI [ options ]
 .SH DESCRIPTION
 Starts and supervises several
 .B kubectl port-forward
@@ -12,14 +13,35 @@ processes described in one profile file, reconnecting each one when it
 drops \(em which is what a hand-run port-forward does not do.
 .SH COMMANDS
 .TP
-.BR up " [\fIprofile\fR]"
+.BR up " [\fIprofile\fR] [\fB\-\-reason\fR \fITEXT\fR]"
 Start every forward in the profile. The default profile is
 .I ./portfwd.yaml
 or
 .IR ~/.config/portfwd/default.yaml .
+If any forward in the profile is protected,
+.B \-\-reason
+is required and the whole run is refused without it; see
+.BR "PROTECTED FORWARDS" .
+.TP
+.BR env " [\fIprofile\fR] [\fB\-\-format\fR \fIdotenv\fR|\fIexport\fR|\fIjson\fR]"
+Print the profile as environment variables, two per forward:
+.IB NAME _HOST
+(always
+.BR localhost )
+and
+.IB NAME _PORT
+(the local half of
+.BR ports ).
+.I NAME
+is the forward's
+.B name
+uppercased, with every character that is not a letter or a digit replaced by
+an underscore. The default format is
+.IR dotenv .
 .TP
 .B status
-Show the forwards and their health.
+Show the forwards and their health. A protected forward is marked
+.BR [protected] .
 .TP
 .BI logs " NAME"
 Tail one forward's log.
@@ -36,16 +58,67 @@ list, one block per forward, each with
 .BR target ,
 .B ports
 and optionally
-.B namespace
+.BR namespace ,
+.B context
 and
-.BR context .
+.BR protected .
+An optional
+.B contexts:
+list marks whole contexts
+.BR protected .
 .TP
 .I ~/.config/portfwd/default.yaml
 Fallback profile when there is none in the working directory.
+.TP
+.I ~/.local/state/portfwd/protected.log
+One tab-separated line per finished protected session: context, namespace,
+target, user, start, end, reason. Created mode 0600. Override with
+.BR PORTFWD_AUDIT_LOG .
+.SH PROTECTED FORWARDS
+A forward with
+.B protected: true
+\(em or one whose
+.B context
+is listed under
+.B contexts:
+with
+.B protected: true
+\(em cannot be opened without
+.BR "\-\-reason \fITEXT\fR" .
+The run is refused whole rather than in part, so a profile that names
+production is opened deliberately or not at all. When the session ends,
+.B portfwd down
+appends the record to the log above. A session cut short with the machine is
+closed out with
+.B interrupted
+as its end on the next
+.BR "portfwd up" .
+There is no server and no privileged helper: the log is a local file.
+.SH ENVIRONMENT
+.TP
+.B PORTFWD_STATE_DIR
+Where per-forward pid, log and state files live. Default
+.IR $XDG_RUNTIME_DIR/portfwd-$USER .
+.TP
+.B PORTFWD_RECONNECT_DELAY
+Seconds to wait before reconnecting a dropped forward. Default 2.
+.TP
+.B PORTFWD_AUDIT_LOG
+Where finished protected sessions are appended. Default
+.IR $XDG_STATE_HOME/portfwd/protected.log .
 .SH EXIT STATUS
 .TP
 .B 0
 The command completed.
+.TP
+.B 64
+.BR portfwd (1)
+was invoked wrong: no profile, an unknown option, or an unknown
+.BR \-\-format .
+.TP
+.B 77
+A protected forward was opened without
+.BR \-\-reason .
 .TP
 .B non-zero
 The profile was missing or invalid, or a forward could not be started.
@@ -67,6 +140,20 @@ Follow one of them:
 .PP
 .RS
 .B portfwd logs db
+.RE
+.PP
+Write the project's
+.I .env
+from the same profile:
+.PP
+.RS
+.B portfwd env > .env
+.RE
+.PP
+Open a protected forward, on the record:
+.PP
+.RS
+.B portfwd up \-\-reason \(dqINC-4711: replaying the stuck batch\(dq
 .RE
 .SH SEE ALSO
 .BR kubectl (1).

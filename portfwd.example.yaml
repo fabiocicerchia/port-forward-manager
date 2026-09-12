@@ -1,4 +1,12 @@
 # Copy to ./portfwd.yaml (per-project) or ~/.config/portfwd/default.yaml (global).
+
+# Optional. Marks whole kube contexts as protected: any forward on them needs
+# `portfwd up --reason "<why>"`, and each session is appended to
+# $PORTFWD_AUDIT_LOG (default ~/.local/state/portfwd/protected.log).
+contexts:
+  - name: prod
+    protected: true
+
 forwards:
   - name: db
     target: svc/postgres
@@ -17,3 +25,15 @@ forwards:
     namespace: monitoring
     ports: "3000:3000"
     context: staging
+  # Protected by the `contexts:` block above.
+  - name: prod-db
+    target: svc/postgres
+    namespace: data
+    ports: "15432:5432"
+    context: prod
+  # Or protect one forward on its own, whatever context it runs on.
+  - name: payments
+    target: svc/payments
+    namespace: app
+    ports: "9000:80"
+    protected: true
