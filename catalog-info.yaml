@@ -1,0 +1,23 @@
+# Backstage catalog entry, read by paved's scorecard plugin.
+#
+# Every check paved scores is derived from this file alone — no cluster
+# access, no CI credentials. What is absent here is absent from the score.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: port-forward-manager
+  description: >-
+      Declarative kubectl port-forward orchestrator — define your forwards in YAML, keep them alive, and
+      manage them as a group with one command.
+  annotations:
+    github.com/project-slug: fabiocicerchia/port-forward-manager
+    backstage.io/source-location: url:https://github.com/fabiocicerchia/port-forward-manager/
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://github.com/fabiocicerchia/port-forward-manager
+      title: Source
+spec:
+  type: library
+  lifecycle: production
+  owner: group:default/kodebeat
+  system: oss-tools
