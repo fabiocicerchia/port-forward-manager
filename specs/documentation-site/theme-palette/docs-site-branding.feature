@@ -12,11 +12,11 @@ Feature: Branding the documentation site
     Then the <element> is drawn in <colouring>
 
     Examples:
-      | page              | element                              | colouring                          |
-      | the rendered docs | header and navigation primary colour | blue #3b82f6                       |
-      | the rendered docs | primary button                       | a gradient from #38bdf8 to #3b82f6 |
-      | the splash page   | project title                        | a gradient from #38bdf8 to #3b82f6 |
-      | the splash page   | GitHub button                        | a gradient from #38bdf8 to #3b82f6 |
+      | page              | element               | colouring                          |
+      | the rendered docs | theme primary colour  | blue #3b82f6                       |
+      | the rendered docs | primary button        | a gradient from #38bdf8 to #3b82f6 |
+      | the splash page   | project title         | a gradient from #38bdf8 to #3b82f6 |
+      | the splash page   | GitHub button         | a gradient from #38bdf8 to #3b82f6 |
 
   @id:documentation-site.theme-palette.002 @rule:docs.theme.links-legible-per-scheme @inferred @source:docs/stylesheets/extra.css#[data-md-color-scheme="slate"]
   Scenario Outline: Links use the accent colour that stays readable in the active colour scheme
@@ -42,4 +42,4 @@ Feature: Branding the documentation site
     Given the docs site has no logo configured
     When a reader opens any docs page
     Then the header and the navigation title show no logo icon
-    And the header shows only the site name
+    And the header shows the site name with no logo beside it

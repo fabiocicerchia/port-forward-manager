@@ -3,7 +3,7 @@ Feature: Opening protected forwards only with a reason
   Operators responsible for production clusters need every forward into a protected context or service to be opened deliberately, with a stated reason, or not at all.
 
   Background:
-    Given a profile whose forwards include protected ones
+    Given a profile of forwards
 
   @id:protected-access.reason-gate.001 @rule:protected-access.reason-gate.reason-required @inferred @source:portfwd#cmd_up
   Scenario Outline: A profile with protected forwards is refused without a reason
@@ -11,7 +11,7 @@ Feature: Opening protected forwards only with a reason
     When the operator starts the profile without a reason
     Then the command exits with status 77
     And the refusal lists "<forward>" as protected in this profile
-    And the refusal says opening a protected forward needs --reason "<why>" and names the audit log it is logged to
+    And the refusal says opening a protected forward needs a --reason and names the audit log it is logged to
 
     Examples:
       | forward  | protected_by                                            |
@@ -20,7 +20,7 @@ Feature: Opening protected forwards only with a reason
 
   @id:protected-access.reason-gate.002 @rule:protected-access.reason-gate.refusal-starts-nothing @inferred @source:portfwd#cmd_up
   Scenario: A refused run opens no forward at all, not even unprotected ones
-    Given the profile also has an unprotected forward "dev-db"
+    Given the profile has a protected forward "prod-db" and an unprotected forward "dev-db"
     When the operator starts the profile without a reason
     Then no forward is started, "dev-db" included
     And status reports nothing running
@@ -28,6 +28,7 @@ Feature: Opening protected forwards only with a reason
 
   @id:protected-access.reason-gate.003 @rule:protected-access.reason-gate.reason-opens-all @inferred @source:portfwd#cmd_up
   Scenario: With a reason every forward starts and protected ones are flagged
+    Given the profile has both protected and unprotected forwards
     When the operator starts the profile with --reason "incident 4711"
     Then every forward in the profile is started
     And each protected forward's start line ends with "[protected]"
@@ -35,7 +36,7 @@ Feature: Opening protected forwards only with a reason
 
   @id:protected-access.reason-gate.004 @rule:protected-access.reason-gate.only-literal-true-protects @inferred @source:portfwd#parse_profile @questionable
   Scenario Outline: Only the value true marks a forward or context as protected
-    Given the profile has a forward "payments" with protected: <value>
+    Given the profile's only forward is "payments", with protected: <value>
     When the operator starts the profile without a reason
     Then the run is <outcome>
 

@@ -6,5 +6,5 @@ Feature: Following a forward's log
   Scenario: The operator can follow one forward's log live
     Given forward "db" has been started
     When the operator follows the logs of db
-    Then db's connecting and reconnecting lines and kubectl output are shown
+    Then the last lines of db's log are shown: its connecting and reconnecting lines and kubectl output
     And new lines appear as they are written until the operator stops

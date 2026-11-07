@@ -9,10 +9,10 @@ Feature: Finding the profile
     Then the output says portfwd: profile <used>
 
     Examples:
-      | available                                                          | invocation               | used                           |
-      | team.yaml, ./portfwd.yaml and ~/.config/portfwd/default.yaml exist | naming team.yaml         | team.yaml                      |
-      | ./portfwd.yaml and ~/.config/portfwd/default.yaml exist            | without naming a profile | ./portfwd.yaml                 |
-      | only ~/.config/portfwd/default.yaml exists                         | without naming a profile | ~/.config/portfwd/default.yaml |
+      | available                                                          | invocation               | used                               |
+      | team.yaml, ./portfwd.yaml and ~/.config/portfwd/default.yaml exist | naming team.yaml         | team.yaml                          |
+      | ./portfwd.yaml and ~/.config/portfwd/default.yaml exist            | without naming a profile | ./portfwd.yaml                     |
+      | only ~/.config/portfwd/default.yaml exists                         | without naming a profile | $HOME/.config/portfwd/default.yaml |
 
   @id:profiles.profile-discovery.002 @rule:profiles.discovery.none-found @inferred @source:portfwd#find_profile
   Scenario: Without any profile the command is refused
