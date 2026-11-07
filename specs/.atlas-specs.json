@@ -1,0 +1,883 @@
+{
+ "excluded": {
+  "docs/stylesheets": [
+   {
+    "candidate": "Hero block styling (gradient title, tagline, button spacing)",
+    "covered_by": "",
+    "reason": "UNVERIFIABLE",
+    "source": "docs/stylesheets/extra.css#.md-typeset .hero"
+   },
+   {
+    "candidate": "Feature card depth, hover lift and accent icon colour",
+    "covered_by": "",
+    "reason": "UNVERIFIABLE",
+    "source": "docs/stylesheets/extra.css#.md-typeset .grid.cards"
+   },
+   {
+    "candidate": "Pill-shaped buttons with hover lift",
+    "covered_by": "",
+    "reason": "UNVERIFIABLE",
+    "source": "docs/stylesheets/extra.css#.md-typeset .md-button"
+   },
+   {
+    "candidate": "Translucent blurred header with hairline divider and shadow on scroll",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "docs/stylesheets/extra.css#.md-header"
+   },
+   {
+    "candidate": "Heading weights, letter-spacing and font features",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset h1"
+   },
+   {
+    "candidate": "Rounded, bordered code blocks",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset .highlight"
+   },
+   {
+    "candidate": "Card-style tables with uppercase headers (the comment says tables scroll, but the rule sets overflow: hidden)",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset table:not([class])"
+   },
+   {
+    "candidate": "Tab link opacity, nav title and active-link weight",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-tabs__link"
+   },
+   {
+    "candidate": "Footer background, divider and muted text",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-footer-meta"
+   },
+   {
+    "candidate": "Smooth scrolling on in-page anchors",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#html"
+   }
+  ],
+  "port-forward-manager/dockerfile": [
+   {
+    "candidate": "Base image is alpine pinned by sha256 digest",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#FROM"
+   },
+   {
+    "candidate": "Image installs bash, kubectl, netcat-openbsd, procps, coreutils, gawk without an apk cache",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#RUN"
+   },
+   {
+    "candidate": "portfwd script copied to /usr/local/bin/portfwd",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#COPY"
+   },
+   {
+    "candidate": "`up` blocks in the foreground as PID 1 and stops forwards on SIGTERM/SIGINT (docker stop / Ctrl+C)",
+    "covered_by": "forwarding/foreground-mode (enforced in portfwd#cmd_up, not the Dockerfile)",
+    "reason": "DUPLICATE_OF",
+    "source": "portfwd#cmd_up"
+   },
+   {
+    "candidate": "portfwd status always exits 0",
+    "covered_by": "monitoring/health-status",
+    "reason": "DUPLICATE_OF",
+    "source": "portfwd#cmd_status"
+   }
+  ],
+  "port-forward-manager/install": [
+   {
+    "candidate": "Downloaded file is staged in a temp file and removed on exit",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "install.sh#install.sh"
+   },
+   {
+    "candidate": "Release checksum is not verified before install",
+    "covered_by": "distribution.installer.installs-latest-release",
+    "reason": "UNVERIFIABLE",
+    "source": "install.sh#install.sh"
+   }
+  ],
+  "port-forward-manager/makefile": [
+   {
+    "candidate": "make with no target prints the list of targets and their descriptions",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#help"
+   },
+   {
+    "candidate": "make setup installs the pre-commit hook",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#setup"
+   },
+   {
+    "candidate": "make lint runs every pre-commit hook on every file",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#lint"
+   },
+   {
+    "candidate": "make test runs the lifecycle test with kubectl stubbed",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#test"
+   },
+   {
+    "candidate": "make run runs portfwd from the checkout, ARGS defaulting to help",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#run"
+   },
+   {
+    "candidate": "make format fixes whitespace, line endings and final newlines and ignores the fixing hooks' exit codes",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#format"
+   },
+   {
+    "candidate": "make analyze runs shellcheck, exiting 69 with an install hint when shellcheck is missing",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#analyze"
+   },
+   {
+    "candidate": "make build is a declared no-op that explains nothing is compiled",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#build"
+   }
+  ],
+  "port-forward-manager/portfwd": [
+   {
+    "candidate": "Per-forward state files (want, pid, ports, session markers) in the state directory",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "portfwd#cmd_up"
+   },
+   {
+    "candidate": "State directory location (PORTFWD_STATE_DIR / XDG_RUNTIME_DIR / /tmp, per user)",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "portfwd#portfwd"
+   },
+   {
+    "candidate": "Stopping kills the supervisor's child processes before the supervisor",
+    "covered_by": "forwarding.stop.stops-all",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "portfwd#cmd_down"
+   },
+   {
+    "candidate": "Stopping closes protected sessions into the audit log",
+    "covered_by": "protected-access.audit-log.one-record-per-session",
+    "reason": "DUPLICATE_OF",
+    "source": "portfwd#cmd_down"
+   },
+   {
+    "candidate": "UTC ISO-8601 timestamp format of start/end",
+    "covered_by": "protected-access.audit-log.one-record-per-session",
+    "reason": "DUPLICATE_OF",
+    "source": "portfwd#now"
+   },
+   {
+    "candidate": "Audit log parent directory created on demand",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "portfwd#audit_close"
+   },
+   {
+    "candidate": "--reason=TEXT and --format=FMT equals forms",
+    "covered_by": "protected-access.reason-gate.reason-opens-all",
+    "reason": "TRIVIAL",
+    "source": "portfwd#cmd_up"
+   },
+   {
+    "candidate": "Empty --reason \"\" treated as no reason",
+    "covered_by": "protected-access.reason-gate.reason-required",
+    "reason": "TRIVIAL",
+    "source": "portfwd#cmd_up"
+   },
+   {
+    "candidate": "JSON output for a profile with no forwards is {}",
+    "covered_by": "app-integration.export.formats",
+    "reason": "TRIVIAL",
+    "source": "portfwd#cmd_env"
+   },
+   {
+    "candidate": "Unprotected forwards are not recorded in the audit log",
+    "covered_by": "protected-access.audit-log.one-record-per-session",
+    "reason": "DUPLICATE_OF",
+    "source": "portfwd#cmd_up"
+   },
+   {
+    "candidate": "Unknown format rejected before the profile is looked up",
+    "covered_by": "cli.usage-errors.exit-64",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "portfwd#cmd_env"
+   },
+   {
+    "candidate": "logs for an unknown forward name shows tail's error",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "portfwd#cmd_logs"
+   },
+   {
+    "candidate": "Lifecycle test with stubbed kubectl",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#test.sh"
+   }
+  ]
+ },
+ "lifted": {
+  "docs/stylesheets": [],
+  "port-forward-manager/dockerfile": [],
+  "port-forward-manager/install": [],
+  "port-forward-manager/makefile": [],
+  "port-forward-manager/portfwd": [
+   {
+    "from_source": "portfwd#audit_close",
+    "rule": "protected-access.audit-log.owner-only: the protected-session log is private to its owner (file mode 600 on creation)"
+   },
+   {
+    "from_source": "portfwd#audit_close",
+    "rule": "protected-access.audit-log.one-record-per-session: each protected session produces exactly one log line (pending record removed once written)"
+   }
+  ]
+ },
+ "retired": [],
+ "scenarios": {
+  "app-integration.env-export.001": {
+   "file": "specs/app-integration/env-export/env-export.feature",
+   "fingerprint": "86dd7d08ac4d",
+   "human": false,
+   "rule": "app-integration.export.formats",
+   "source": "portfwd#cmd_env",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "app-integration.variable-naming.001": {
+   "file": "specs/app-integration/variable-naming/env-variable-naming.feature",
+   "fingerprint": "93cef7276882",
+   "human": false,
+   "rule": "app-integration.variable-naming.valid-uppercase-prefix",
+   "source": "portfwd#env_key",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "cli.built-in-help.001": {
+   "file": "specs/cli/built-in-help/built-in-help.feature",
+   "fingerprint": "256d349bf0ef",
+   "human": false,
+   "rule": "cli.help.usage-on-unknown-command",
+   "source": "portfwd#portfwd",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "cli.usage-errors.001": {
+   "file": "specs/cli/usage-errors/usage-errors.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "cli.usage-errors.exit-64",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.container-image.001": {
+   "file": "specs/distribution/container-image/container-image.feature",
+   "fingerprint": "829adfa8d067",
+   "human": false,
+   "rule": "distribution.container-image.default-command-shows-help",
+   "source": "Dockerfile#CMD",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.container-image.002": {
+   "file": "specs/distribution/container-image/container-image.feature",
+   "fingerprint": "dbd3a39c7cd4",
+   "human": false,
+   "rule": "distribution.container-image.arguments-are-portfwd-commands",
+   "source": "Dockerfile#ENTRYPOINT",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.container-image.003": {
+   "file": "specs/distribution/container-image/container-image.feature",
+   "fingerprint": "1408e9d51ca3",
+   "human": false,
+   "rule": "distribution.container-image.runs-as-non-root",
+   "source": "Dockerfile#USER",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.container-image.004": {
+   "file": "specs/distribution/container-image/container-image.feature",
+   "fingerprint": "1ffece12f493",
+   "human": false,
+   "rule": "distribution.container-image.no-health-check",
+   "source": "Dockerfile#HEALTHCHECK",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.one-line-installer.001": {
+   "file": "specs/distribution/one-line-installer/one-line-installer.feature",
+   "fingerprint": "f98128ce0b2e",
+   "human": false,
+   "rule": "distribution.installer.installs-latest-release",
+   "source": "install.sh#install.sh",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.one-line-installer.002": {
+   "file": "specs/distribution/one-line-installer/one-line-installer.feature",
+   "fingerprint": "f98128ce0b2e",
+   "human": false,
+   "rule": "distribution.installer.custom-install-directory",
+   "source": "install.sh#install.sh",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.one-line-installer.003": {
+   "file": "specs/distribution/one-line-installer/one-line-installer.feature",
+   "fingerprint": "f98128ce0b2e",
+   "human": false,
+   "rule": "distribution.installer.aborts-without-installing-on-failure",
+   "source": "install.sh#install.sh",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.system-install.001": {
+   "file": "specs/distribution/system-install/system-install.feature",
+   "fingerprint": "6705b99e5dac",
+   "human": false,
+   "rule": "distribution.system-install.installs-command-and-man-page-under-prefix",
+   "source": "Makefile#install",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.system-install.002": {
+   "file": "specs/distribution/system-install/system-install.feature",
+   "fingerprint": "d1ea52bc6b0d",
+   "human": false,
+   "rule": "distribution.system-install.uninstall-removes-installed-files",
+   "source": "Makefile#uninstall",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "distribution.system-install.003": {
+   "file": "specs/distribution/system-install/system-install.feature",
+   "fingerprint": "d1ea52bc6b0d",
+   "human": false,
+   "rule": "distribution.system-install.uninstall-when-not-installed-is-silent",
+   "source": "Makefile#uninstall",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation-site.theme-palette.001": {
+   "file": "specs/documentation-site/theme-palette/docs-site-branding.feature",
+   "fingerprint": "564588beee72",
+   "human": false,
+   "rule": "docs.theme.single-accent-pair",
+   "source": "docs/stylesheets/extra.css#:root",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation-site.theme-palette.002": {
+   "file": "specs/documentation-site/theme-palette/docs-site-branding.feature",
+   "fingerprint": "433084a194b6",
+   "human": false,
+   "rule": "docs.theme.links-legible-per-scheme",
+   "source": "docs/stylesheets/extra.css#[data-md-color-scheme=\"slate\"]",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation-site.theme-palette.003": {
+   "file": "specs/documentation-site/theme-palette/docs-site-branding.feature",
+   "fingerprint": "564588beee72",
+   "human": false,
+   "rule": "docs.theme.no-external-assets",
+   "source": "docs/stylesheets/extra.css#:root",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation-site.theme-palette.004": {
+   "file": "specs/documentation-site/theme-palette/docs-site-branding.feature",
+   "fingerprint": "c702704e5aae",
+   "human": false,
+   "rule": "docs.branding.no-placeholder-logo",
+   "source": "docs/stylesheets/extra.css#.md-header__button.md-logo",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.auto-reconnect.001": {
+   "file": "specs/forwarding/auto-reconnect/auto-reconnect.feature",
+   "fingerprint": "46ccd1281c30",
+   "human": false,
+   "rule": "forwarding.auto-reconnect.reconnect-after-delay",
+   "source": "portfwd#supervise",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.foreground-mode.001": {
+   "file": "specs/forwarding/foreground-mode/foreground-mode.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "forwarding.foreground.pid1-blocks-and-stops-on-signal",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.start-forwards.001": {
+   "file": "specs/forwarding/start-forwards/start-forwards.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "forwarding.start.reports-each-forward",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.start-forwards.002": {
+   "file": "specs/forwarding/start-forwards/start-forwards.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "forwarding.start.skip-running",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.start-forwards.003": {
+   "file": "specs/forwarding/start-forwards/start-forwards.feature",
+   "fingerprint": "46ccd1281c30",
+   "human": false,
+   "rule": "forwarding.start.connects-declared-target",
+   "source": "portfwd#supervise",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "forwarding.stop-forwards.001": {
+   "file": "specs/forwarding/stop-forwards/stop-forwards.feature",
+   "fingerprint": "45a6e0c4a081",
+   "human": false,
+   "rule": "forwarding.stop.stops-all",
+   "source": "portfwd#cmd_down",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "monitoring.forward-logs.001": {
+   "file": "specs/monitoring/forward-logs/forward-logs.feature",
+   "fingerprint": "186476aef3ac",
+   "human": false,
+   "rule": "monitoring.logs.follow-one-forward",
+   "source": "portfwd#cmd_logs",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "monitoring.health-status.001": {
+   "file": "specs/monitoring/health-status/health-status.feature",
+   "fingerprint": "b52d286b2d20",
+   "human": false,
+   "rule": "monitoring.status.up-or-down-by-local-port",
+   "source": "portfwd#cmd_status",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "monitoring.health-status.002": {
+   "file": "specs/monitoring/health-status/health-status.feature",
+   "fingerprint": "b52d286b2d20",
+   "human": false,
+   "rule": "monitoring.status.protected-marker",
+   "source": "portfwd#cmd_status",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "monitoring.health-status.003": {
+   "file": "specs/monitoring/health-status/health-status.feature",
+   "fingerprint": "b52d286b2d20",
+   "human": false,
+   "rule": "monitoring.status.nothing-running",
+   "source": "portfwd#cmd_status",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.context-settings.001": {
+   "file": "specs/profiles/context-settings/context-settings.feature",
+   "fingerprint": "83f6d5c37ed1",
+   "human": false,
+   "rule": "profiles.contexts.protection-applies-wherever-declared",
+   "source": "portfwd#parse_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.forward-definitions.001": {
+   "file": "specs/profiles/forward-definitions/forward-definitions.feature",
+   "fingerprint": "83f6d5c37ed1",
+   "human": false,
+   "rule": "profiles.forwards.block-and-inline-styles",
+   "source": "portfwd#parse_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.forward-definitions.002": {
+   "file": "specs/profiles/forward-definitions/forward-definitions.feature",
+   "fingerprint": "83f6d5c37ed1",
+   "human": false,
+   "rule": "profiles.forwards.incomplete-entry-ignored",
+   "source": "portfwd#parse_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.profile-discovery.001": {
+   "file": "specs/profiles/profile-discovery/profile-discovery.feature",
+   "fingerprint": "cb549eef9ec6",
+   "human": false,
+   "rule": "profiles.discovery.search-order",
+   "source": "portfwd#find_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.profile-discovery.002": {
+   "file": "specs/profiles/profile-discovery/profile-discovery.feature",
+   "fingerprint": "cb549eef9ec6",
+   "human": false,
+   "rule": "profiles.discovery.none-found",
+   "source": "portfwd#find_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.profile-discovery.003": {
+   "file": "specs/profiles/profile-discovery/profile-discovery.feature",
+   "fingerprint": "cb549eef9ec6",
+   "human": false,
+   "rule": "profiles.discovery.missing-explicit-path-falls-back",
+   "source": "portfwd#find_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "profiles.runtime-settings.001": {
+   "file": "specs/profiles/runtime-settings/audit-log-location.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "profiles.runtime-settings.audit-log-location",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.interrupted-sessions.001": {
+   "file": "specs/protected-access/interrupted-sessions/interrupted-protected-sessions.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "protected-access.interrupted-sessions.closed-as-interrupted",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.reason-gate.001": {
+   "file": "specs/protected-access/reason-gate/protected-reason-gate.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "protected-access.reason-gate.reason-required",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.reason-gate.002": {
+   "file": "specs/protected-access/reason-gate/protected-reason-gate.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "protected-access.reason-gate.refusal-starts-nothing",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.reason-gate.003": {
+   "file": "specs/protected-access/reason-gate/protected-reason-gate.feature",
+   "fingerprint": "7e474d253999",
+   "human": false,
+   "rule": "protected-access.reason-gate.reason-opens-all",
+   "source": "portfwd#cmd_up",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.reason-gate.004": {
+   "file": "specs/protected-access/reason-gate/protected-reason-gate.feature",
+   "fingerprint": "83f6d5c37ed1",
+   "human": false,
+   "rule": "protected-access.reason-gate.only-literal-true-protects",
+   "source": "portfwd#parse_profile",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.session-audit-log.001": {
+   "file": "specs/protected-access/session-audit-log/protected-session-audit-log.feature",
+   "fingerprint": "d2164a1d32a5",
+   "human": false,
+   "rule": "protected-access.audit-log.one-record-per-session",
+   "source": "portfwd#audit_close",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.session-audit-log.002": {
+   "file": "specs/protected-access/session-audit-log/protected-session-audit-log.feature",
+   "fingerprint": "d2164a1d32a5",
+   "human": false,
+   "rule": "protected-access.audit-log.owner-only",
+   "source": "portfwd#audit_close",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "protected-access.session-audit-log.003": {
+   "file": "specs/protected-access/session-audit-log/protected-session-audit-log.feature",
+   "fingerprint": "4c615f378adb",
+   "human": false,
+   "rule": "protected-access.audit-log.columns-stay-intact",
+   "source": "portfwd#audit_open",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  }
+ },
+ "taxonomy": {
+  "domains": [
+   {
+    "areas": [
+     {
+      "description": "Finding the profile to use from an explicit path, the working directory, or the user's default config location.",
+      "slug": "profile-discovery",
+      "title": "Profile discovery"
+     },
+     {
+      "description": "Declaring each forward's name, target, namespace, ports and cluster context in a YAML profile, in block or inline style.",
+      "slug": "forward-definitions",
+      "title": "Forward definitions"
+     },
+     {
+      "description": "Declaring settings for a whole cluster context, such as marking every forward to it as protected.",
+      "slug": "context-settings",
+      "title": "Cluster context settings"
+     },
+     {
+      "description": "Environment variables that tune where state and audit logs live and how long to wait before reconnecting.",
+      "slug": "runtime-settings",
+      "title": "Runtime settings"
+     }
+    ],
+    "description": "How users describe which port-forwards they want and how the tool finds and reads that description.",
+    "slug": "profiles",
+    "title": "Profiles & configuration"
+   },
+   {
+    "areas": [
+     {
+      "description": "Bringing up every forward in a profile at once, skipping ones already running and reporting what started.",
+      "slug": "start-forwards",
+      "title": "Starting forwards"
+     },
+     {
+      "description": "Watching each forward and reconnecting it after a delay whenever the connection drops.",
+      "slug": "auto-reconnect",
+      "title": "Auto-reconnect"
+     },
+     {
+      "description": "Shutting down all running forwards and their supervisors cleanly.",
+      "slug": "stop-forwards",
+      "title": "Stopping forwards"
+     },
+     {
+      "description": "Staying in the foreground when run as a container's main process and stopping everything on termination signals.",
+      "slug": "foreground-mode",
+      "title": "Foreground mode"
+     }
+    ],
+    "description": "Opening, keeping alive and closing the set of port-forwards defined in a profile.",
+    "slug": "forwarding",
+    "title": "Port forwarding"
+   },
+   {
+    "areas": [
+     {
+      "description": "Listing each forward as up or down by probing its local port, including protected markers.",
+      "slug": "health-status",
+      "title": "Health status"
+     },
+     {
+      "description": "Following a single forward's connection and reconnection log live.",
+      "slug": "forward-logs",
+      "title": "Forward logs"
+     }
+    ],
+    "description": "Seeing whether forwards are healthy and what they are doing.",
+    "slug": "monitoring",
+    "title": "Monitoring"
+   },
+   {
+    "areas": [
+     {
+      "description": "Refusing to open any forward in a profile that contains protected forwards unless a reason is given.",
+      "slug": "reason-gate",
+      "title": "Reason requirement"
+     },
+     {
+      "description": "Recording who opened which protected forward, where, when it started and ended, and why, in a private local log file.",
+      "slug": "session-audit-log",
+      "title": "Session audit log"
+     },
+     {
+      "description": "Closing out audit records left open by a supervisor that died, marking them as interrupted.",
+      "slug": "interrupted-sessions",
+      "title": "Interrupted session recovery"
+     }
+    ],
+    "description": "Guarding sensitive forwards, such as production, behind a stated reason and keeping a record of every session.",
+    "slug": "protected-access",
+    "title": "Protected access & audit"
+   },
+   {
+    "areas": [
+     {
+      "description": "Printing each forward's host and port as dotenv lines, shell exports or JSON.",
+      "slug": "env-export",
+      "title": "Environment export"
+     },
+     {
+      "description": "Turning forward names into valid uppercase environment variable prefixes.",
+      "slug": "variable-naming",
+      "title": "Variable naming"
+     }
+    ],
+    "description": "Handing forward connection details to other tools and applications.",
+    "slug": "app-integration",
+    "title": "App integration"
+   },
+   {
+    "areas": [
+     {
+      "description": "Showing usage and the profile format when run without a known command.",
+      "slug": "built-in-help",
+      "title": "Built-in help"
+     },
+     {
+      "description": "Clear messages and standard exit codes for wrong invocations, missing profiles and missing reasons.",
+      "slug": "usage-errors",
+      "title": "Usage errors & exit codes"
+     }
+    ],
+    "description": "How the command presents itself and reports misuse.",
+    "slug": "cli",
+    "title": "Command-line experience"
+   },
+   {
+    "areas": [
+     {
+      "description": "Downloading the latest released script and installing it onto the PATH with a single command.",
+      "slug": "one-line-installer",
+      "title": "One-line installer"
+     },
+     {
+      "description": "Installing and uninstalling the command and its man page from a checkout under a chosen prefix.",
+      "slug": "system-install",
+      "title": "System install"
+     },
+     {
+      "description": "A minimal non-root image bundling portfwd with kubectl and its other runtime dependencies.",
+      "slug": "container-image",
+      "title": "Container image"
+     }
+    ],
+    "description": "Getting portfwd onto a machine or into a container.",
+    "slug": "distribution",
+    "title": "Installation & distribution"
+   },
+   {
+    "areas": [
+     {
+      "description": "A self-documenting set of make targets, including running from the checkout and a declared no-op build.",
+      "slug": "task-runner",
+      "title": "Task runner"
+     },
+     {
+      "description": "Running the full lifecycle test against a stubbed kubectl without a cluster.",
+      "slug": "testing",
+      "title": "Testing"
+     },
+     {
+      "description": "Pre-commit hook setup, the full lint gate, shell static analysis and automatic whitespace fixes.",
+      "slug": "quality-gate",
+      "title": "Linting & formatting"
+     }
+    ],
+    "description": "Tasks contributors use to test, check and run the project.",
+    "slug": "developer-tooling",
+    "title": "Developer tooling"
+   },
+   {
+    "areas": [
+     {
+      "description": "A single accent colour pair driving typography, links and chrome across the docs and splash page with no external assets.",
+      "slug": "theme-palette",
+      "title": "Theme & palette"
+     },
+     {
+      "description": "Styling for the hero, buttons, feature cards and other documentation page elements.",
+      "slug": "page-components",
+      "title": "Page components"
+     }
+    ],
+    "description": "The look and feel of the project's published documentation.",
+    "slug": "documentation-site",
+    "title": "Documentation site"
+   }
+  ]
+ }
+}
