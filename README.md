@@ -10,6 +10,12 @@
 [![CI carbon](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/fabiocicerchia/port-forward-manager/gh-pages/badge.json)](.github/workflows/carbon-badge.yml)
 [![Release](https://img.shields.io/github/v/release/fabiocicerchia/port-forward-manager)](https://github.com/fabiocicerchia/port-forward-manager/releases)
 
+> [!WARNING]
+> **This project is retired** and no longer maintained. If you need something
+> for this, [kftray](https://github.com/hcavarsan/kftray) manages kubectl
+> port-forwards from a saved config, with a GUI and a TUI. It is a separate
+> project, actively developed, and worth a look.
+
 The perpetual daily annoyance, fixed.
 
 ```console
